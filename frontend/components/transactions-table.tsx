@@ -10,7 +10,6 @@ interface Transaction {
   account_id: string
   account_type: string
   nickname: string
-  type: string
   amount: number
   positive: boolean
   transaction_date: string
@@ -23,16 +22,13 @@ interface TransactionsTableProps {
 
 function mapNessieTransaction(tx: any): Transaction {
   return {
-    id: `${tx.account_id}-${tx.type}-${tx.transaction_date}`, 
-    accountId: tx.account_id,
-    amount: tx.amount,
-    description: tx.description || '—',
-    category: tx.account_type || 'Unknown', 
-    subcategory: tx.type || 'other',      
-    date: tx.transaction_date,
-    type: tx.positive ? 'credit' : 'debit',
-    merchant: '—',                       
-    isRecurring: false,                   
+    account_id: tx.account_id ?? 'unknown_account',
+    account_type: tx.account_type ?? 'Unknown',
+    nickname: tx.nickname ?? tx.account_name ?? '—',
+    amount: typeof tx.amount === 'number' ? tx.amount : Number(tx.amount ?? 0),
+    positive: typeof tx.positive === 'boolean' ? tx.positive : (tx.positive === 'true' || (tx.amount && Number(tx.amount) >= 0)),
+    transaction_date: tx.transaction_date ?? tx.date ?? new Date().toISOString(),
+    description: tx.description ?? tx.memo ?? '—'
   }
 }
 
@@ -43,6 +39,9 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
   const [typeFilter, setTypeFilter] = useState<string>('all')
   const [showFilters, setShowFilters] = useState(false)
   const [loading, setLoading] = useState(true)
+
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -61,7 +60,6 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
     fetchTransactions()
   }, [])
 
-
   useEffect(() => {
     let filtered = transactions
 
@@ -79,6 +77,7 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
     }
 
     setFilteredTransactions(filtered)
+    setCurrentPage(1)
   }, [transactions, searchTerm, typeFilter])
 
   const formatCurrency = (amount: number) =>
@@ -91,11 +90,16 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
       year: 'numeric'
     })
 
+  const indexOfLast = currentPage * itemsPerPage
+  const indexOfFirst = indexOfLast - itemsPerPage
+  const currentTransactions = filteredTransactions.slice(indexOfFirst, indexOfLast)
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage)
+
   if (loading) {
     return (
       <Card className={className}>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-sm">
             <Filter className="h-5 w-5" />
             Recent Transactions
           </CardTitle>
@@ -110,14 +114,13 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
   }
 
   return (
-    <Card className={`${className} flex flex-col h-full`}>
+    <Card className={`${className} flex flex-col h-full w-[500px]`}>
       <CardHeader className="flex-shrink-0">
         <CardTitle className="flex items-center gap-2 text-sm font-semibold">
           <Filter className="h-5 w-5" />
           Recent Transactions
         </CardTitle>
 
-        {/* Search and Filters */}
         <div className="space-y-4 mt-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -125,16 +128,16 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
               placeholder="Search transactions..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-10 text-xs"
             />
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-xs">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 text-xs"
             >
               <Filter className="h-4 w-4" />
               Filters
@@ -146,68 +149,35 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
                 variant="ghost"
                 size="sm"
                 onClick={() => setTypeFilter('all')}
-                className="text-muted-foreground"
+                className="text-muted-foreground text-xs"
               >
                 Clear filters
               </Button>
             )}
           </div>
-
-          {showFilters && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
-              <div>
-                <label className="text-sm font-medium mb-2 block">Type</label>
-                <select
-                  value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value)}
-                  className="w-full p-2 border rounded-md bg-background"
-                >
-                  <option value="all">All</option>
-                  <option value="credit">Income</option>
-                  <option value="debit">Expense</option>
-                </select>
-              </div>
-            </div>
-          )}
         </div>
       </CardHeader>
 
       <CardContent className="flex-1 min-h-0">
         <div className="h-full overflow-auto">
-          <table className="w-full">
-            <thead className="sticky top-0 bg-background">
+          <table className="w-full text-xs">
+            <thead className="sticky top-0 bg-background text-xs">
               <tr className="border-b">
-                <th className="text-left py-3 px-2 font-medium text-muted-foreground">Date</th>
-                <th className="text-left py-3 px-2 font-medium text-muted-foreground">Description</th>
-                <th className="text-left py-3 px-2 font-medium text-muted-foreground">Account</th>
-                <th className="text-left py-3 px-2 font-medium text-muted-foreground">Type</th>
-                <th className="text-right py-3 px-2 font-medium text-muted-foreground">Amount</th>
+                <th className="text-left py-2 px-2 font-medium text-muted-foreground">Date</th>
+                <th className="text-left py-2 px-2 font-medium text-muted-foreground">Description</th>
+                <th className="text-left py-2 px-2 font-medium text-muted-foreground">Account</th>
+                <th className="text-right py-2 px-2 font-medium text-muted-foreground">Amount</th>
               </tr>
             </thead>
             <tbody>
-              {filteredTransactions.map((tx, i) => (
+              {currentTransactions.map((tx, i) => (
                 <tr key={i} className="border-b hover:bg-muted/50">
-                  <td className="py-3 px-2 text-sm">{formatDate(tx.transaction_date)}</td>
-                  <td className="py-3 px-2 text-sm">{tx.description || '—'}</td>
-                  <td className="py-3 px-2 text-sm text-muted-foreground">
+                  <td className="py-1 px-2">{formatDate(tx.transaction_date)}</td>
+                  <td className="py-1 px-2">{tx.description || '—'}</td>
+                  <td className="py-1 px-2 text-muted-foreground">
                     {tx.nickname} ({tx.account_type})
                   </td>
-                  <td className="py-3 px-2 text-center">
-                    <span
-                      className={`text-xs px-2 py-1 rounded ${
-                        tx.positive
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                          : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                      }`}
-                    >
-                      {tx.positive ? 'Income' : 'Expense'}
-                    </span>
-                  </td>
-                  <td
-                    className={`py-3 px-2 text-right font-medium ${
-                      tx.positive ? 'text-green-600' : 'text-red-600'
-                    }`}
-                  >
+                  <td className={`py-1 px-2 text-right font-medium ${tx.positive ? 'text-green-600' : 'text-red-600'}`}>
                     {tx.positive ? '+' : '-'}{formatCurrency(tx.amount)}
                   </td>
                 </tr>
@@ -216,8 +186,32 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
           </table>
 
           {filteredTransactions.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-center py-4 text-muted-foreground text-xs">
               No transactions found matching your criteria.
+            </div>
+          )}
+
+          {filteredTransactions.length > itemsPerPage && (
+            <div className="flex justify-between items-center mt-2 text-xs">
+              <Button
+                size="sm"
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </Button>
+
+              <span className="text-xs">
+                Page {currentPage} of {totalPages}
+              </span>
+
+              <Button
+                size="sm"
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </Button>
             </div>
           )}
         </div>
