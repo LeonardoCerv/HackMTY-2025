@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from routers import api_router, graphs_router
+from routers import api_router
 from api import router as nessie_router  # Importar el router de api.py
 import uvicorn
 
