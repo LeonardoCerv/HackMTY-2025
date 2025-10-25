@@ -1,9 +1,10 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
 import { useTransactions, useAccounts } from "@/lib/hooks"
 import { Transaction, Account } from "@/types/financial"
+import { formatDate } from "@/lib/utils"
 
 export function CompactEarningsSection() {
   const { transactions, isLoading } = useTransactions()
@@ -12,28 +13,40 @@ export function CompactEarningsSection() {
   // Calculate metrics
   const netWorth = accounts.reduce((sum: number, acc: Account) => sum + acc.balance, 0)
   const monthlyIncome = transactions
-    .filter((txn: Transaction) => txn.type === 'credit' && txn.category === 'Income')
-    .reduce((sum: number, txn: Transaction) => sum + txn.amount, 0)
+    .filter((txn: any) => txn.positive === true)
+    .reduce((sum: number, txn: any) => sum + txn.amount, 0)
 
-  // Process earnings data for chart
+  // Process earnings data for chart - ensure 6 months of data
   const earningsByMonth = transactions
-    .filter((txn: Transaction) => txn.type === 'credit' && txn.category === 'Income')
-    .reduce((acc: Record<string, number>, txn: Transaction) => {
-      const month = new Date(txn.date).toLocaleDateString('en-US', { month: 'short' })
-      acc[month] = (acc[month] || 0) + txn.amount
+    .filter((txn: any) => txn.positive === true)
+    .reduce((acc: Record<string, number>, txn: any) => {
+      const date = new Date(txn.transaction_date)
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const year = String(date.getFullYear()).slice(-2)
+      const monthKey = `${month}-${year}`
+      acc[monthKey] = (acc[monthKey] || 0) + txn.amount
       return acc
     }, {})
 
-  const earningsData = Object.entries(earningsByMonth).map(([month, amount]) => ({
-    month,
-    amount
-  }))
+  // Generate last 6 months with data points
+  const currentDate = new Date()
+  const earningsData = []
+  for (let i = 5; i >= 0; i--) {
+    const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1)
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const year = String(date.getFullYear()).slice(-2)
+    const monthKey = `${month}-${year}`
+    earningsData.push({
+      month: monthKey,
+      amount: earningsByMonth[monthKey] || 0
+    })
+  }
 
-  // Income breakdown
+  // Income breakdown by transaction type
   const incomeBreakdown = transactions
-    .filter((txn: Transaction) => txn.type === 'credit' && txn.category === 'Income')
-    .reduce((acc: Record<string, number>, txn: Transaction) => {
-      const source = txn.subcategory
+    .filter((txn: any) => txn.positive === true)
+    .reduce((acc: Record<string, number>, txn: any) => {
+      const source = txn.type
       acc[source] = (acc[source] || 0) + txn.amount
       return acc
     }, {})
@@ -80,7 +93,7 @@ export function CompactEarningsSection() {
         <div>
           <p className="text-sm font-medium text-card-foreground mb-2">6-Month Trend</p>
           <ResponsiveContainer width="100%" height={80}>
-            <LineChart data={earningsData}>
+            <AreaChart data={earningsData}>
               <XAxis dataKey="month" stroke="#A0A0A0" fontSize={10} tickLine={false} axisLine={false} />
               <YAxis
                 stroke="#A0A0A0"
@@ -99,8 +112,15 @@ export function CompactEarningsSection() {
                 }}
                 formatter={(value: number) => [`$${value.toLocaleString()}`, "Income"]}
               />
-              <Line type="monotone" dataKey="amount" stroke="#156aa2" strokeWidth={2} dot={{ fill: "#156aa2", r: 3 }} />
-            </LineChart>
+              <Area 
+                type="monotone" 
+                dataKey="amount" 
+                stroke="#156aa2" 
+                fill="#156aa2" 
+                fillOpacity={0.3}
+                strokeWidth={2} 
+              />
+            </AreaChart>
           </ResponsiveContainer>
         </div>
 

@@ -1,28 +1,63 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
-import { useTransactions } from "@/lib/hooks"
-import { Transaction } from "@/types/financial"
+import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { useTransactions, useAccounts } from "@/lib/hooks"
+import { Transaction, Account } from "@/types/financial"
 
 export function CompactExpensesSection() {
   const { transactions, isLoading } = useTransactions()
+  const { accounts } = useAccounts()
 
-  // Process expenses data
-  const expensesByCategory = transactions
-    .filter((txn: Transaction) => txn.type === 'debit')
-    .reduce((acc: Record<string, number>, txn: Transaction) => {
-      const category = txn.category
-      acc[category] = (acc[category] || 0) + Math.abs(txn.amount)
+  // Calculate metrics
+  const totalDebt = accounts
+    .filter((acc: any) => acc.type === 'loan' || (acc.type === 'Credit Card' && acc.balance < 0))
+    .reduce((sum: number, acc: any) => sum + Math.abs(acc.balance < 0 ? acc.balance : acc.balance), 0)
+
+  const monthlyExpenses = transactions
+    .filter((txn: any) => txn.positive === false)
+    .reduce((sum: number, txn: any) => sum + Math.abs(txn.amount), 0)
+
+  // Process expenses data for chart - ensure 6 months of data
+  const expensesByMonth = transactions
+    .filter((txn: any) => txn.positive === false)
+    .reduce((acc: Record<string, number>, txn: any) => {
+      const date = new Date(txn.transaction_date)
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const year = String(date.getFullYear()).slice(-2)
+      const monthKey = `${month}-${year}`
+      acc[monthKey] = (acc[monthKey] || 0) + Math.abs(txn.amount)
       return acc
     }, {})
 
-  const expensesData = Object.entries(expensesByCategory).map(([category, amount]) => ({
-    category,
-    amount
-  }))
+  // Generate last 6 months with data points
+  const currentDate = new Date()
+  const expensesData = []
+  for (let i = 5; i >= 0; i--) {
+    const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1)
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const year = String(date.getFullYear()).slice(-2)
+    const monthKey = `${month}-${year}`
+    expensesData.push({
+      month: monthKey,
+      amount: expensesByMonth[monthKey] || 0
+    })
+  }
 
-  const totalExpenses = expensesData.reduce((sum, item) => sum + item.amount, 0)
+  // Expense breakdown by transaction type
+  const expenseBreakdown = transactions
+    .filter((txn: any) => txn.positive === false)
+    .reduce((acc: Record<string, number>, txn: any) => {
+      const source = txn.type
+      acc[source] = (acc[source] || 0) + Math.abs(txn.amount)
+      return acc
+    }, {})
+
+  const expenseSources = Object.entries(expenseBreakdown).map(([source, amount]) => ({
+    source,
+    amount,
+    percentage: (amount / Object.values(expenseBreakdown).reduce((a, b) => a + b, 0)) * 100
+  }))
 
   if (isLoading) {
     return (
@@ -46,22 +81,28 @@ export function CompactExpensesSection() {
       </CardHeader>
       <CardContent className="space-y-2 px-3 pb-2">
         {/* Key Metrics */}
-        <div className="rounded-lg bg-accent/5 p-3 border border-accent/10">
-          <p className="text-xs font-medium text-muted-foreground mb-1">Monthly Expenses</p>
-          <p className="text-base font-bold text-accent">${totalExpenses.toLocaleString()}</p>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-lg bg-red-50 dark:bg-red-950/20 p-3 border border-red-200 dark:border-red-800">
+            <p className="text-xs font-medium text-muted-foreground mb-1">Total Debt</p>
+            <p className="text-base font-bold text-red-600 dark:text-red-400">${totalDebt.toLocaleString()}</p>
+          </div>
+          <div className="rounded-lg bg-red-50 dark:bg-red-950/20 p-3 border border-red-200 dark:border-red-800">
+            <p className="text-xs font-medium text-muted-foreground mb-1">Monthly Expenses</p>
+            <p className="text-base font-bold text-red-600 dark:text-red-400">${monthlyExpenses.toLocaleString()}</p>
+          </div>
         </div>
 
         <div>
-          <p className="text-sm font-medium text-card-foreground mb-2">Monthly Breakdown</p>
+          <p className="text-sm font-medium text-card-foreground mb-2">6-Month Trend</p>
           <ResponsiveContainer width="100%" height={80}>
-            <BarChart data={expensesData}>
-              <XAxis dataKey="category" stroke="#A0A0A0" fontSize={10} tickLine={false} axisLine={false} />
+            <LineChart data={expensesData}>
+              <XAxis dataKey="month" stroke="#A0A0A0" fontSize={10} tickLine={false} axisLine={false} />
               <YAxis
                 stroke="#A0A0A0"
                 fontSize={10}
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(value: number) => `$${value}`}
+                tickFormatter={(value: number) => `$${value / 1000}k`}
               />
               <Tooltip
                 contentStyle={{
@@ -71,33 +112,26 @@ export function CompactExpensesSection() {
                   color: "#FFFFFF",
                   fontSize: "12px",
                 }}
-                formatter={(value: number) => [`$${value.toLocaleString()}`, "Spent"]}
+                formatter={(value: number) => [`$${value.toLocaleString()}`, "Expenses"]}
               />
-              <Bar dataKey="amount" fill="#CB2426" radius={[3, 3, 0, 0]} />
-            </BarChart>
+              <Line type="monotone" dataKey="amount" stroke="#CB2426" strokeWidth={2} dot={{ fill: "#CB2426", r: 3 }} />
+            </LineChart>
           </ResponsiveContainer>
         </div>
 
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-card-foreground">Category Details</p>
-            <p className="text-sm font-semibold text-card-foreground">Total: ${totalExpenses.toLocaleString()}</p>
-          </div>
-          {expensesData.map((item) => {
-            const percentage = (item.amount / totalExpenses) * 100
-            return (
-              <div key={item.category} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-accent" />
-                  <span className="text-sm text-muted-foreground">{item.category}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">{percentage.toFixed(0)}%</span>
-                  <span className="text-sm font-semibold text-card-foreground">${item.amount.toLocaleString()}</span>
-                </div>
+          <p className="text-sm font-medium text-card-foreground">Expense Sources</p>
+          {expenseSources.map((item) => (
+            <div key={item.source} className="space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">{item.source}</span>
+                <span className="text-sm font-semibold text-card-foreground">${item.amount.toLocaleString()}</span>
               </div>
-            )
-          })}
+              <div className="h-2 w-full overflow-hidden rounded-full bg-secondary/50">
+                <div className="h-full bg-red-600 rounded-full transition-all duration-300" style={{ width: `${item.percentage}%` }} />
+              </div>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>

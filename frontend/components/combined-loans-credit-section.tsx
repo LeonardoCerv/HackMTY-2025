@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { useAccounts } from '@/lib/hooks'
 import { Account } from '@/types/financial'
 import { DollarSign } from 'lucide-react'
+import { formatDate } from '@/lib/utils'
 
 interface CreditScoreData {
   creditScore: number
@@ -181,7 +182,7 @@ export function CombinedLoansCreditSection() {
                     <span>Excellent</span>
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    Updated {new Date(creditScore.lastUpdated).toLocaleDateString()}
+                    Updated {formatDate(creditScore.lastUpdated)}
                   </div>
                 </div>
               </div>

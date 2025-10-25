@@ -11,16 +11,16 @@ export const dynamic = 'force-dynamic'
 export default function Home() {
   return (
     <main className="min-h-screen bg-background p-1 md:p-2">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto">
         <CompactDashboardHeader />
 
-        <div className="mt-2 grid gap-2 h-[calc(100vh-120px)]" style={{ gridTemplateColumns: '1fr 2fr' }}>
-          {/* Transactions Table - 1/3 of the page (left side) */}
+        <div className="mt-2 grid gap-2 h-[calc(100vh-120px)]" style={{ gridTemplateColumns: '5fr 7fr' }}>
+          {/* Transactions Table - 5/12 of the page (left side) */}
           <div className="w-full h-full">
             <TransactionsTable className="h-full" />
           </div>
 
-          {/* Chat + Graphs Section - 2/3 of the page (right side) */}
+          {/* Chat + Graphs Section - 7/12 of the page (right side) */}
           <div className="w-full h-full flex flex-col space-y-2">
             {/* Chat Input at the top - compact */}
             <CompactAIChatAssistant />

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CreditCard } from 'lucide-react'
+import { formatDate } from '@/lib/utils'
 
 interface CreditScoreData {
   creditScore: number
@@ -129,7 +130,7 @@ export function CompactCreditScoreSection() {
               {creditScore.scoreRange}
             </div>
             <div className="text-xs text-muted-foreground">
-              Updated {new Date(creditScore.lastUpdated).toLocaleDateString()}
+              Updated {formatDate(creditScore.lastUpdated)}
             </div>
           </div>
         </div>

@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Search, Filter, ChevronDown } from 'lucide-react'
+import { formatDate } from '@/lib/utils'
 
 interface Transaction {
   account_id: string
@@ -41,7 +42,7 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
   const [loading, setLoading] = useState(true)
 
   const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 10
+  const itemsPerPage = 20
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -83,13 +84,6 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount)
 
-  const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    })
-
   const indexOfLast = currentPage * itemsPerPage
   const indexOfFirst = indexOfLast - itemsPerPage
   const currentTransactions = filteredTransactions.slice(indexOfFirst, indexOfLast)
@@ -114,7 +108,7 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
   }
 
   return (
-    <Card className={`${className} flex flex-col h-full w-[500px]`}>
+    <Card className={`${className} flex flex-col h-full`}>
       <CardHeader className="flex-shrink-0">
         <CardTitle className="flex items-center gap-2 text-sm font-semibold">
           <Filter className="h-5 w-5" />
@@ -163,23 +157,26 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
           <table className="w-full text-xs">
             <thead className="sticky top-0 bg-background text-xs">
               <tr className="border-b">
-                <th className="text-left py-2 px-2 font-medium text-muted-foreground">Date</th>
-                <th className="text-left py-2 px-2 font-medium text-muted-foreground">Description</th>
-                <th className="text-left py-2 px-2 font-medium text-muted-foreground">Account</th>
-                <th className="text-right py-2 px-2 font-medium text-muted-foreground">Amount</th>
+                <th className="text-left py-2 px-2 font-medium text-card-foreground w-20">Date</th>
+                <th className="text-left py-2 px-2 font-medium text-card-foreground w-40">Account</th>
+                <th className="text-left py-2 px-2 font-medium text-card-foreground w-40">Amount</th>
+                <th className="text-left py-2 px-2 font-medium text-card-foreground min-w-0">Description</th>
               </tr>
             </thead>
             <tbody>
               {currentTransactions.map((tx, i) => (
                 <tr key={i} className="border-b hover:bg-muted/50">
-                  <td className="py-1 px-2">{formatDate(tx.transaction_date)}</td>
-                  <td className="py-1 px-2">{tx.description || '—'}</td>
-                  <td className="py-1 px-2 text-muted-foreground">
-                    {tx.nickname} ({tx.account_type})
+                  <td className="py-1 px-2 text-muted-foreground">{formatDate(tx.transaction_date)}</td>
+
+                  <td className="py-1 px-2 text-card-foreground">
+                    {tx.account_type}
                   </td>
-                  <td className={`py-1 px-2 text-right font-medium ${tx.positive ? 'text-green-600' : 'text-red-600'}`}>
+
+                  <td className={`py-1 px-2 font-medium ${tx.positive ? 'text-primary' : 'text-accent'}`}>
                     {tx.positive ? '+' : '-'}{formatCurrency(tx.amount)}
                   </td>
+
+                  <td className="py-1 px-2 text-muted-foreground truncate">[{tx.nickname}] {tx.description || '—'}</td>
                 </tr>
               ))}
             </tbody>

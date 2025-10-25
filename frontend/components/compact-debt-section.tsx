@@ -3,14 +3,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { CreditCard, TrendingDown, AlertCircle } from "lucide-react"
 import { useAccounts } from "@/lib/hooks"
-import { Account } from "@/types/financial"
 
 export function CompactDebtSection() {
   const { accounts, isLoading: accountsLoading } = useAccounts()
 
-  const debtAccounts = accounts.filter((acc: Account) => acc.type === 'credit' || acc.type === 'loan')
-  const totalDebt = debtAccounts.reduce((sum: number, account: Account) => sum + Math.abs(account.balance), 0)
-  const primaryLoan = debtAccounts.find((acc: Account) => acc.type === 'loan') || debtAccounts[0]
+  // Filter for accounts that might have debt (Credit Card with balance, or loans)
+  const debtAccounts = accounts.filter((acc: any) => 
+    (acc.type === 'Credit Card' && acc.balance < 0) || acc.type === 'loan'
+  )
+  const totalDebt = debtAccounts.reduce((sum: number, account: any) => 
+    sum + Math.abs(account.balance < 0 ? account.balance : 0), 0
+  )
+  const primaryLoan = debtAccounts.find((acc: any) => acc.type === 'loan') || debtAccounts[0]
 
   const isLoading = accountsLoading
 
@@ -44,15 +48,15 @@ export function CompactDebtSection() {
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-2">
                 <div className="rounded-full bg-accent/10 p-1">
-                  {primaryLoan.type === "credit" ? (
+                  {primaryLoan.type === "Credit Card" ? (
                     <CreditCard className="h-4 w-4 text-accent" />
                   ) : (
                     <TrendingDown className="h-4 w-4 text-accent" />
                   )}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-card-foreground">{primaryLoan.name}</p>
-                  <p className="text-xs text-muted-foreground">{primaryLoan.type === 'credit' ? 'Credit Card' : 'Loan'}</p>
+                  <p className="text-sm font-medium text-card-foreground">{primaryLoan.nickname || 'Unnamed Account'}</p>
+                  <p className="text-xs text-muted-foreground">{primaryLoan.type}</p>
                 </div>
               </div>
             </div>
@@ -63,19 +67,19 @@ export function CompactDebtSection() {
                 <span className="text-sm font-bold text-accent">${Math.abs(primaryLoan.balance).toLocaleString()}</span>
               </div>
 
-              {primaryLoan.type === "credit" && primaryLoan.creditLimit && (
+              {primaryLoan.type === "Credit Card" && primaryLoan.balance < 0 && (
                 <>
                   <div className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-muted-foreground">Credit Utilization</span>
-                      <span className="text-muted-foreground">{((Math.abs(primaryLoan.balance) / primaryLoan.creditLimit) * 100).toFixed(0)}%</span>
+                      <span className="text-muted-foreground">Calculating...</span>
                     </div>
                     <div className="h-2 w-full overflow-hidden rounded-full bg-background">
-                      <div className="h-full bg-accent" style={{ width: `${(Math.abs(primaryLoan.balance) / primaryLoan.creditLimit) * 100}%` }} />
+                      <div className="h-full bg-accent" style={{ width: `30%` }} />
                     </div>
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-muted-foreground">${Math.abs(primaryLoan.balance).toLocaleString()} used</span>
-                      <span className="text-muted-foreground">${primaryLoan.creditLimit.toLocaleString()} limit</span>
+                      <span className="text-muted-foreground">Limit unknown</span>
                     </div>
                   </div>
                 </>
@@ -83,19 +87,13 @@ export function CompactDebtSection() {
 
               <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">APR</span>
-                  <span className="text-xs font-medium text-card-foreground">{primaryLoan.apr}%</span>
+                  <span className="text-xs text-muted-foreground">Interest Rate</span>
+                  <span className="text-xs font-medium text-card-foreground">N/A</span>
                 </div>
-                {primaryLoan.monthlyPayment && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">
-                      {primaryLoan.type === "credit" ? "Min Payment" : "Monthly"}
-                    </span>
-                    <span className="text-xs font-medium text-card-foreground">
-                      ${primaryLoan.monthlyPayment.toLocaleString()}
-                    </span>
-                  </div>
-                )}
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">Monthly Payment</span>
+                  <span className="text-xs font-medium text-card-foreground">N/A</span>
+                </div>
               </div>
             </div>
           </div>
@@ -107,10 +105,9 @@ export function CompactDebtSection() {
               <TrendingDown className="h-3 w-3 text-primary" />
             </div>
             <div className="flex-1">
-              <p className="text-xs font-medium text-card-foreground">Debt Payoff Strategy</p>
+              <p className="text-xs font-medium text-card-foreground">Debt Management Tips</p>
               <p className="mt-0.5 text-xs text-muted-foreground">
-                Focus on paying off your Capital One card first (highest APR at 18.99%). Consider increasing monthly
-                payment to $200 to save $450 in interest.
+                Monitor your credit utilization and consider paying down high-interest debt first.
               </p>
             </div>
           </div>
