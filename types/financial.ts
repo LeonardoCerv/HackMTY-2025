@@ -18,7 +18,7 @@ export interface Transaction {
   accountId: string
   amount: number
   description: string
-  category: string
+  category: string 
   subcategory: string
   date: string
   type: 'credit' | 'debit'

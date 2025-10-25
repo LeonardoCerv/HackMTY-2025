@@ -4,7 +4,7 @@ import { Account, Transaction } from '@/types/financial'
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
 export function useAccounts() {
-  const { data, error, isLoading } = useSWR('/api/accounts', fetcher)
+  const { data, error, isLoading } = useSWR('/api/v1/accounts', fetcher)
   return {
     accounts: (data?.accounts || []) as Account[],
     isLoading,

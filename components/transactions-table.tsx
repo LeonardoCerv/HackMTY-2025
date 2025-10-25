@@ -1,86 +1,95 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Transaction } from '@/types/financial'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Search, Filter, ChevronDown } from 'lucide-react'
 
+interface Transaction {
+  account_id: string
+  account_type: string
+  nickname: string
+  type: string
+  amount: number
+  positive: boolean
+  transaction_date: string
+  description: string
+}
+
 interface TransactionsTableProps {
   className?: string
+}
+
+function mapNessieTransaction(tx: any): Transaction {
+  return {
+    id: `${tx.account_id}-${tx.type}-${tx.transaction_date}`, 
+    accountId: tx.account_id,
+    amount: tx.amount,
+    description: tx.description || '—',
+    category: tx.account_type || 'Unknown', 
+    subcategory: tx.type || 'other',      
+    date: tx.transaction_date,
+    type: tx.positive ? 'credit' : 'debit',
+    merchant: '—',                       
+    isRecurring: false,                   
+  }
 }
 
 export function TransactionsTable({ className }: TransactionsTableProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([])
   const [searchTerm, setSearchTerm] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [typeFilter, setTypeFilter] = useState<string>('all')
   const [showFilters, setShowFilters] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  // Fetch transactions
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
         const response = await fetch('/api/transactions')
         const data = await response.json()
-        setTransactions(data.transactions)
-        setFilteredTransactions(data.transactions)
+        const mapped: Transaction[] = data.transactions.map(mapNessieTransaction)
+        setTransactions(mapped)
+        setFilteredTransactions(mapped)
       } catch (error) {
         console.error('Failed to fetch transactions:', error)
       } finally {
         setLoading(false)
       }
     }
-
     fetchTransactions()
   }, [])
 
-  // Filter transactions based on search and filters
+
   useEffect(() => {
     let filtered = transactions
 
-    // Search filter
     if (searchTerm) {
-      filtered = filtered.filter(transaction =>
-        transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        transaction.merchant.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        transaction.category.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter((t) =>
+        t.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        t.nickname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        t.account_type?.toLowerCase().includes(searchTerm.toLowerCase())
       )
     }
 
-    // Category filter
-    if (categoryFilter !== 'all') {
-      filtered = filtered.filter(transaction => transaction.category === categoryFilter)
-    }
-
-    // Type filter
     if (typeFilter !== 'all') {
-      filtered = filtered.filter(transaction => transaction.type === typeFilter)
+      const isPositive = typeFilter === 'credit'
+      filtered = filtered.filter((t) => t.positive === isPositive)
     }
 
     setFilteredTransactions(filtered)
-  }, [transactions, searchTerm, categoryFilter, typeFilter])
+  }, [transactions, searchTerm, typeFilter])
 
-  // Get unique categories for filter dropdown
-  const categories = Array.from(new Set(transactions.map(t => t.category)))
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount)
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(Math.abs(amount))
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
     })
-  }
 
   if (loading) {
     return (
@@ -132,14 +141,11 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
               <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
             </Button>
 
-            {(categoryFilter !== 'all' || typeFilter !== 'all') && (
+            {typeFilter !== 'all' && (
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => {
-                  setCategoryFilter('all')
-                  setTypeFilter('all')
-                }}
+                onClick={() => setTypeFilter('all')}
                 className="text-muted-foreground"
               >
                 Clear filters
@@ -150,27 +156,13 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
           {showFilters && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-lg">
               <div>
-                <label className="text-sm font-medium mb-2 block">Category</label>
-                <select
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="w-full p-2 border rounded-md bg-background"
-                >
-                  <option value="all">All Categories</option>
-                  {categories.map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
                 <label className="text-sm font-medium mb-2 block">Type</label>
                 <select
                   value={typeFilter}
                   onChange={(e) => setTypeFilter(e.target.value)}
                   className="w-full p-2 border rounded-md bg-background"
                 >
-                  <option value="all">All Types</option>
+                  <option value="all">All</option>
                   <option value="credit">Income</option>
                   <option value="debit">Expense</option>
                 </select>
@@ -187,45 +179,36 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
               <tr className="border-b">
                 <th className="text-left py-3 px-2 font-medium text-muted-foreground">Date</th>
                 <th className="text-left py-3 px-2 font-medium text-muted-foreground">Description</th>
-                <th className="text-left py-3 px-2 font-medium text-muted-foreground">Category</th>
-                <th className="text-left py-3 px-2 font-medium text-muted-foreground">Merchant</th>
+                <th className="text-left py-3 px-2 font-medium text-muted-foreground">Account</th>
+                <th className="text-left py-3 px-2 font-medium text-muted-foreground">Type</th>
                 <th className="text-right py-3 px-2 font-medium text-muted-foreground">Amount</th>
-                <th className="text-center py-3 px-2 font-medium text-muted-foreground">Type</th>
               </tr>
             </thead>
             <tbody>
-              {filteredTransactions.map((transaction) => (
-                <tr key={transaction.id} className="border-b hover:bg-muted/50">
-                  <td className="py-3 px-2 text-sm">
-                    {formatDate(transaction.date)}
-                  </td>
-                  <td className="py-3 px-2">
-                    <div className="font-medium">{transaction.description}</div>
-                    {transaction.isRecurring && (
-                      <span className="text-xs bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded mt-1 inline-block">
-                        Recurring
-                      </span>
-                    )}
-                  </td>
+              {filteredTransactions.map((tx, i) => (
+                <tr key={i} className="border-b hover:bg-muted/50">
+                  <td className="py-3 px-2 text-sm">{formatDate(tx.transaction_date)}</td>
+                  <td className="py-3 px-2 text-sm">{tx.description || '—'}</td>
                   <td className="py-3 px-2 text-sm text-muted-foreground">
-                    {transaction.category}
-                  </td>
-                  <td className="py-3 px-2 text-sm text-muted-foreground">
-                    {transaction.merchant}
-                  </td>
-                  <td className={`py-3 px-2 text-right font-medium ${
-                    transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {transaction.type === 'credit' ? '+' : '-'}{formatCurrency(transaction.amount)}
+                    {tx.nickname} ({tx.account_type})
                   </td>
                   <td className="py-3 px-2 text-center">
-                    <span className={`text-xs px-2 py-1 rounded ${
-                      transaction.type === 'credit'
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                    }`}>
-                      {transaction.type === 'credit' ? 'Income' : 'Expense'}
+                    <span
+                      className={`text-xs px-2 py-1 rounded ${
+                        tx.positive
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                          : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                      }`}
+                    >
+                      {tx.positive ? 'Income' : 'Expense'}
                     </span>
+                  </td>
+                  <td
+                    className={`py-3 px-2 text-right font-medium ${
+                      tx.positive ? 'text-green-600' : 'text-red-600'
+                    }`}
+                  >
+                    {tx.positive ? '+' : '-'}{formatCurrency(tx.amount)}
                   </td>
                 </tr>
               ))}
