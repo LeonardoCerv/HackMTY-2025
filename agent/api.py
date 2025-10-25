@@ -17,7 +17,7 @@ def fetch_from_nessie(url: str) -> List[Dict[str, Any]]:
         data = response.json()
         return data if isinstance(data, list) else []
     except requests.exceptions.RequestException as err:
-        print(f"⚠ Error al conectar con Nessie: {err}")
+        print(f"⚠️ Error al conectar con Nessie: {err}")
         return []
 
 
@@ -86,8 +86,8 @@ def get_transactions_for_customer():
                     "description": tx.get("description") or "",
                 })
 
-    # 6️⃣ Ordenar por fecha descendente
-    all_tx.sort(key=lambda x: x.get("transaction_date", ""), reverse=True)
+    # 6️⃣ Ordenar por fecha descendente (manejar None values correctamente)
+    all_tx.sort(key=lambda x: x.get("transaction_date") or "", reverse=True)
 
     # 7️⃣ Respuesta final
     return {
