@@ -1,9 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from routers import api_router, graphs_router
-from api import router as nessie_router  # Importar el router de api.py
+from api_routers import api_router
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+from routers import agent_router
 import uvicorn
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Create FastAPI instance
 app = FastAPI(
@@ -25,8 +32,7 @@ app.add_middleware(
 
 # Include routers (SOLO UNA VEZ CADA UNO)
 app.include_router(api_router)
-app.include_router(graphs_router)
-app.include_router(nessie_router)  # Agregar el router de Nessie API
+app.include_router(agent_router)
 
 # Root endpoint
 @app.get("/")
