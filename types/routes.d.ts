@@ -10,7 +10,7 @@ type Routes = AppRoutes | PageRoutes | LayoutRoutes | RedirectRoutes | RewriteRo
 
 
 interface ParamMap {
-  "/": {}
+  "/": {} // eslint-disable-line @typescript-eslint/no-empty-object-type
 }
 
 
