@@ -22,11 +22,6 @@ class Settings:
         "http://127.0.0.1:3000",
         "http://127.0.0.1:5173"
     ]
-    
-    # Supabase Configuration
-    SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
-    SUPABASE_KEY: str = os.getenv("SUPABASE_KEY", "")
-    SUPABASE_SERVICE_ROLE_KEY: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
 
 # Create settings instance
 settings = Settings()

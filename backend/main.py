@@ -25,7 +25,6 @@ app.add_middleware(
 
 # Include routers (SOLO UNA VEZ CADA UNO)
 app.include_router(api_router)
-app.include_router(graphs_router)
 app.include_router(nessie_router)  # Agregar el router de Nessie API
 
 # Root endpoint

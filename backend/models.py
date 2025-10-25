@@ -7,23 +7,6 @@ class BaseResponse(BaseModel):
     success: bool
     message: str
 
-# Graph models 
-class GraphBase(BaseModel): 
-    type: str
-    title: str
-    sql_query: str
-    extra: Optional[dict] = None
-    justification: Optional[str] = None
-
-class GraphCreate(GraphBase):
-    pass
-
-class Graph(GraphBase):
-    id: str
-
-class AgentQueryResponse(BaseModel):
-    events: List[dict[str, Any]]
-
 # User models
 class UserBase(BaseModel):
     email: EmailStr
