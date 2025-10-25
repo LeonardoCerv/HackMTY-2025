@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 46, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/kamim/HackMTY-2025/app/api/credit-score/route.ts"],"sourcesContent":["import { NextResponse } from 'next/server'\r\n\r\nexport async function GET() {\r\n  try {\r\n    // In a real implementation, this would fetch from Capital One's API\r\n    // For now, returning mock data\r\n    const creditScore = 742\r\n    const scoreRange = 'Good'\r\n\r\n    return NextResponse.json({\r\n      creditScore,\r\n      scoreRange,\r\n      lastUpdated: new Date().toISOString()\r\n    })\r\n  } catch (error) {\r\n    console.error('Error fetching credit score:', error)\r\n    return NextResponse.json(\r\n      { error: 'Failed to fetch credit score' },\r\n      { status: 500 }\r\n    )\r\n  }\r\n}"],"names":[],"mappings":";;;;AAAA;;AAEO,eAAe;IACpB,IAAI;QACF,oEAAoE;QACpE,+BAA+B;QAC/B,MAAM,cAAc;QACpB,MAAM,aAAa;QAEnB,OAAO,gJAAY,CAAC,IAAI,CAAC;YACvB;YACA;YACA,aAAa,IAAI,OAAO,WAAW;QACrC;IACF,EAAE,OAAO,OAAO;QACd,QAAQ,KAAK,CAAC,gCAAgC;QAC9C,OAAO,gJAAY,CAAC,IAAI,CACtB;YAAE,OAAO;QAA+B,GACxC;YAAE,QAAQ;QAAI;IAElB;AACF","debugId":null}}]
+}
