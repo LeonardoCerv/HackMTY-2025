@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from routers import api_router, graphs_router
+from api import router as nessie_router  # Importar el router de api.py
 import uvicorn
 
 # Create FastAPI instance
@@ -11,16 +12,8 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Add CORS middleware
-import os
-
 # Configure CORS - allow all origins for public API access
-# In production, you should specify your actual frontend domain
 allowed_origins = ["*"]  # Allow all origins for public API access
-
-from routers import api_router
-
-app.include_router(api_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -30,9 +23,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
+# Include routers (SOLO UNA VEZ CADA UNO)
 app.include_router(api_router)
 app.include_router(graphs_router)
+app.include_router(nessie_router)  # Agregar el router de Nessie API
 
 # Root endpoint
 @app.get("/")

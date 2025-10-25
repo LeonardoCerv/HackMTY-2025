@@ -1,4 +1,4 @@
-const PYTHON_API_BASE_URL = "http://localhost:3000";
+const PYTHON_API_BASE_URL = "http://localhost:8000";
 
 interface NessieAccount {
   _id: string;
