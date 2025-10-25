@@ -15,6 +15,7 @@ import os
 
 logger = logging.getLogger(__name__)
 
+# Create router instances (SIN importar api_router de api.py para evitar conflictos)
 api_router = APIRouter(prefix="/api", tags=["API"])
 graphs_router = APIRouter(prefix="/api/graphs", tags=["Graphs"])
 
