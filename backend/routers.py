@@ -12,6 +12,7 @@ import base64
 # from generate_financial_reports import run_graph_management_agent  # Temporarily disabled - strands not installed
 from generate_new_graph import generate_graph_from_request
 import os
+from api import router as api_router
 
 logger = logging.getLogger(__name__)
 

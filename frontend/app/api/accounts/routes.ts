@@ -1,4 +1,4 @@
-const PYTHON_API_BASE_URL = "http://localhost:8000";
+const PYTHON_API_BASE_URL = "http://localhost:3000";
 
 interface NessieAccount {
   _id: string;
@@ -6,11 +6,9 @@ interface NessieAccount {
   balance: number;
 }
 
- 
-
 export async function GET(request: Request) {
   try {
-    const urlCompleta = `${PYTHON_API_BASE_URLL}/api/v1/accounts`;
+    const urlCompleta = `${PYTHON_API_BASE_URL}/api/v1/accounts`;
 
     const response = await fetch(urlCompleta);
 

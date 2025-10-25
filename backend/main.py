@@ -18,6 +18,10 @@ import os
 # In production, you should specify your actual frontend domain
 allowed_origins = ["*"]  # Allow all origins for public API access
 
+from routers import api_router
+
+app.include_router(api_router)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,

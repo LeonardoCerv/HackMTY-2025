@@ -1,8 +1,9 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, HTTPException
 import requests
 from typing import List, Dict, Any
 
-from main import app
+# Crear un router en lugar de usar app directamente
+router = APIRouter()
 
 NESSIE_API_KEY = "5385334cd89925d890675e8cdd41c9c4"
 NESSIE_BASE_URL = "http://api.nessieisreal.com"
@@ -18,32 +19,12 @@ def fetch_from_nessie(url: str) -> List[Dict[str, Any]]:
     except requests.exceptions.RequestException as err:
         print(f"⚠ Error al conectar con Nessie: {err}")
         return []
-    
-@app.get("/api/v1/accounts")
-def get_accounts() -> List[Dict[str, Any]]:
-    nessie_url = f"{NESSIE_BASE_URL}/accounts?key={NESSIE_API_KEY}"
-
-    try:
-        response = requests.get(nessie_url)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.HTTPError as err:
-        status_code = err.response.status_code
-        raise HTTPException(
-            status_code=status_code,
-            detail="Error al obtener las cuentas de Nessie."
-        )
-    except requests.exceptions.RequestException:
-        raise HTTPException(
-            status_code=503,
-            detail="Error de conexión con la API externa."
-        )
 
 
-@app.get("/transactions")
-def get_transactions_for_customer(customer_index: int = 0):
+@router.get("/api/transactions")
+def get_transactions_for_customer():
     """
-    Obtiene todas las transacciones de un cliente específico basado en su índice (por defecto el primero).
+    Obtiene todas las transacciones del primer cliente disponible.
     """
     # 1️⃣ Obtener todos los clientes
     customers_url = f"{NESSIE_BASE_URL}/customers?key={NESSIE_API_KEY}"
@@ -52,16 +33,12 @@ def get_transactions_for_customer(customer_index: int = 0):
     if not customers:
         raise HTTPException(status_code=404, detail="No se encontraron clientes en Nessie.")
 
-    if customer_index >= len(customers):
-        raise HTTPException(status_code=400, detail=f"El índice {customer_index} excede la cantidad de clientes disponibles.")
-        
-
-    # 2️⃣ Seleccionamos el cliente deseado
-    customer = customers[customer_index]
+    # 2️⃣ Seleccionamos el primer cliente
+    customer = customers[0]
     customer_id = customer["_id"]
     customer_name = f"{customer.get('first_name', '')} {customer.get('last_name', '')}".strip()
 
-    print(customer)
+    print(f"Cliente seleccionado: {customer_name} (ID: {customer_id})")
 
     # 3️⃣ Obtener las cuentas de ese cliente
     accounts_url = f"{NESSIE_BASE_URL}/customers/{customer_id}/accounts?key={NESSIE_API_KEY}"
@@ -123,3 +100,25 @@ def get_transactions_for_customer(customer_index: int = 0):
         "total_transactions": len(all_tx),
         "transactions": all_tx
     }
+
+
+@router.get("/api/v1/accounts")
+def get_accounts() -> List[Dict[str, Any]]:
+    """Obtiene todas las cuentas de Nessie."""
+    nessie_url = f"{NESSIE_BASE_URL}/accounts?key={NESSIE_API_KEY}"
+    
+    try:
+        response = requests.get(nessie_url)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.HTTPError as err:
+        status_code = err.response.status_code
+        raise HTTPException(
+            status_code=status_code,
+            detail="Error al obtener las cuentas de Nessie."
+        )
+    except requests.exceptions.RequestException:
+        raise HTTPException(
+            status_code=503,
+            detail="Error de conexión con la API externa."
+        )
