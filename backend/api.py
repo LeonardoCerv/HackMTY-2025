@@ -74,6 +74,7 @@ def get_transactions_for_customer():
             for tx in transactions:
                 amount = tx.get("amount") or tx.get("payment_amount") or 0
                 all_tx.append({
+                    "type": tx_type,
                     "customer_id": customer_id,
                     "customer_name": customer_name,
                     "account_id": account_id,

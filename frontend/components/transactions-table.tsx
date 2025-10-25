@@ -72,10 +72,10 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
       )
     }
 
-    if (typeFilter !== 'all') {
-      const isPositive = typeFilter === 'credit'
-      filtered = filtered.filter((t) => t.positive === isPositive)
-    }
+    // if (typeFilter !== 'all') {
+    //   const isPositive = typeFilter === 'credit'
+    //   filtered = filtered.filter((t) => t.positive === isPositive)
+    // }
 
     setFilteredTransactions(filtered)
     setCurrentPage(1)
