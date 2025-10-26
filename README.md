@@ -1,3 +1,25 @@
+![Prompt Wisp](/public/logo.png)
+
+[![Language](https://img.shields.io/badge/Language-TypeScript-3178c6?logo=typescript&logoColor=white)]()
+[![Framework](https://img.shields.io/badge/Framework-NextJS-black?logo=nextdotjs&logoColor=white)]()
+[![Backend](https://img.shields.io/badge/Backend-FastAPI-009485?logo=fastapi&logoColor=white)]()
+[![Agent](https://img.shields.io/badge/AI%20Agent-Python-blue)]()
+[![Database](https://img.shields.io/badge/Data-Mock/Nessie-orange)]()
+[![Field](https://img.shields.io/badge/Field-Fintech-white)]()
+[![License](https://img.shields.io/badge/License-MIT-brown)]()
+
+### FINSIGHTS
+Un dashboard financiero full-stack diseñado para ayudar a visualizar gastos, ingresos, deudas y recibir insights en lenguaje natural impulsados por IA.
+
+### [Live demo]() 
+
+## 🖥️ Preview
+
+![Finsights Dashboard](/public/dashboard.jpg)
+![AI Analysis Screenshot](/public/preview-ai.jpg)
+![Expense Grouping](/public/preview-expenses.jpg)
+
+---
 # 💰 Capital One HackMTY 2025 
 
 A full-stack personal finance dashboard demonstrating how to combine a modern React/Next frontend, FastAPI backend, and an AI-powered analysis microservice to visualize transactions, income, expenses, and debt and to provide natural-language financial insights.
