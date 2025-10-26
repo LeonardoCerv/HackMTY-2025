@@ -1,376 +1,190 @@
-<!-- # Capital One HackMTY 2025 - Personal Expense Dashboard
+# 💰 Capital One HackMTY 2025 — Personal Expense Dashboard
 
-A Next.js-based personal finance dashboard that integrates with Capital One's API to provide real-time financial insights and AI-powered conversational analysis.
+A full-stack **personal finance dashboard** built with **Next.js**, **FastAPI**, and **AI-powered financial insights**.  
+It helps users visualize their income, expenses, and debt while interacting with an AI financial assistant for personalized recommendations.
 
-## Features
+---
 
-- **Real-time Financial Dashboard**: View net worth, income, expenses, and debt in real-time
-- **Interactive Charts**: Visualize earnings trends and expense breakdowns
-- **AI Financial Assistant**: Ask questions about your finances using Gemini AI
-- **Expense Analysis**: Identify recurring expenses and savings opportunities
-- **Debt Management**: Track credit cards, loans, and payoff strategies
+## 🚀 Overview
 
-## Tech Stack
+This project demonstrates a **real-world personal finance app** integrating data visualization, backend APIs, and generative AI:
 
-- **Frontend**: Next.js 16, React 19, TypeScript
-- **Styling**: Tailwind CSS
-- **Charts**: Recharts
-- **Data Fetching**: SWR
-- **AI**: Google Gemini AI
-- **UI Components**: Custom component library
+- **Frontend:** Next.js + TypeScript interface for accounts, transactions, and charts  
+- **Backend:** FastAPI endpoints serving financial data (mockable or via Capital One’s Nessie API)  
+- **Agent:** FastAPI service powered by **Google Gemini** for natural-language financial analysis
 
-## Getting Started
+---
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/LeonardoCerv/HackMTY-2025.git
-   cd HackMTY-2025
-   ```
+## ✨ Key Features
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+- 📊 **Real-Time Dashboard** — Track net worth, income, expenses, and liabilities  
+- 🔍 **Transaction Search & Pagination** — Filter and explore your transaction history  
+- 🤖 **AI Assistant** — Ask natural-language financial questions and get smart responses  
+- 💳 **Debt Management** — Monitor loans, credit cards, and payoff suggestions  
+- 🧩 **Mock Data Mode** — Run locally without external APIs  
 
-3. **Set up environment variables**
+---
 
-   Create a `.env.local` file in the root directory:
-   ```env
-   GOOGLE_AI_API_KEY=your_gemini_api_key_here
-   ```
+## 🧠 Tech Stack
 
-   Get your Gemini API key from [Google AI Studio](https://makersuite.google.com/app/apikey).
+| Layer | Technology |
+|-------|-------------|
+| **Frontend** | Next.js 16, React 19, TypeScript, Tailwind CSS |
+| **Backend** | FastAPI (Python 3.10+) |
+| **Agent** | FastAPI + Google Gemini (optional) |
+| **Charts** | Recharts |
+| **Data Fetching** | SWR |
 
-4. **Run the development server**
-   ```bash
-   npm run dev
-   ```
+---
 
-5. **Open your browser**
+## ⚙️ Prerequisites
 
-   Navigate to [http://localhost:3000](http://localhost:3000) to see the dashboard.
+- **Node.js** ≥ 18  
+- **Python** ≥ 3.10  
+- *(Optional)* Google Gemini API key for AI features  
+- *(Optional)* Nessie API key for live financial data  
 
-## API Endpoints
+---
 
-- `GET /api/accounts` - Fetch user accounts
-- `GET /api/transactions` - Fetch transaction history
-- `POST /api/insights` - Get AI-powered financial insights
+## 🔐 Environment Variables
 
-## Key Components
+Create a `.env` (or `.env.local` in the frontend) with:
 
-- **DashboardHeader**: Overview of net worth, income, and expenses
-- **EarningsSection**: Income trends and source breakdown
-- **ExpensesSection**: Expense categories and analysis
-- **DebtSection**: Credit cards and loans management
-- **AIChatAssistant**: Conversational financial advisor
-
-## Example Questions for AI Assistant
-
-- "Which small, recurring expenses are silently eating away most of my earnings?"
-- "How can I reduce my monthly expenses?"
-- "What's my debt payoff strategy?"
-- "Am I saving enough for emergencies?"
-
-## Project Structure
-
-```
-├── app/
-│   ├── api/
-│   │   ├── accounts/route.ts
-│   │   ├── transactions/route.ts
-│   │   └── insights/route.ts
-│   ├── globals.css
-│   ├── layout.tsx
-│   └── page.tsx
-├── components/
-│   ├── ui/
-│   ├── dashboard-header.tsx
-│   ├── earnings-section.tsx
-│   ├── expenses-section.tsx
-│   ├── debt-section.tsx
-│   └── ai-chat-assistant.tsx
-├── lib/
-│   ├── hooks.ts
-│   ├── utils.ts
-│   └── financial-analysis.ts
-└── types/
-    └── financial.ts
+```bash
+GOOGLE_AI_API_KEY=your_gemini_api_key_here   # optional
+NESSIE_API_KEY=your_nessie_key_here           # optional
+use_mock=true                                 # set false for live data
 ```
 
-## Deployment
+---
 
-This project can be deployed on Vercel, Netlify, or any platform supporting Next.js.
+## 🧭 Quick Start (Local Setup)
 
-For Vercel deployment:
-1. Connect your GitHub repository
-2. Add environment variables in Vercel dashboard
-3. Deploy automatically
-
-## Contributing
-
-This project was built for the Capital One HackMTY 2025 hackathon. Feel free to fork and extend with additional features!
-
-## License
-
-MIT License -->
-
-# Capital One HackMTY 2025 — Personal Expense Dashboard
-
-A Next.js personal finance dashboard that integrates a FastAPI backend and an AI Agent service to provide insights, transaction analysis, and debt management suggestions.
-
-## Overview
-
-This project demonstrates a full-stack personal finance product:
-- Frontend: Next.js + TypeScript UI for accounts, transactions, charts and an AI assistant.
-- Backend: FastAPI endpoints serving accounts, transactions, loans and credit data (mockable or via Nessie).
-- Agent: FastAPI AI service that formats LLM responses (Google Gemini) into actionable insights.
-
-## Key features
-
-- Real-time dashboard: net worth, income vs expenses, liabilities.
-- Transaction table with search and pagination.
-- AI assistant: natural-language queries for personalized recommendations and charts.
-- Debt overview: loans, credit score and payoff suggestions.
-- Mock data support for offline development.
-
-## Tech stack
-
-- Frontend: Next.js 16, React 19, TypeScript, Tailwind CSS
-- Backend: FastAPI, Python 3.10+
-- Agent: FastAPI + Google Generative AI (optional)
-- Charts: Recharts
-
-## Prerequisites
-
-- Node.js >= 18 and npm
-- Python 3.10+
-- Google Gemini API key for AI features
-
-## Environment
-
-Create a .env at repo root or use .env.local. Common variables:
-- GOOGLE_AI_API_KEY (optional, for agent)
-- NESSIE_API_KEY (optional, for live data)
-- use_mock (true to use included JSON fixtures)
-
-## Quick start (local development)
-
-1. Clone repository
-bash
+### 1️⃣ Clone Repository
+```bash
 git clone https://github.com/LeonardoCerv/HackMTY-2025.git
 cd HackMTY-2025
+```
 
-
-2. Backend (FastAPI)
-bash
+### 2️⃣ Backend (FastAPI)
+```bash
 cd backend
 python -m venv .venv
-# Windows:
+# Windows
 .venv\Scripts\activate
+# macOS/Linux
+source .venv/bin/activate
+
 pip install -r requirements.txt
-# Run:
-python run.py
-# or:
 uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
 
-
-3. Agent (AI service)
-bash
+### 3️⃣ Agent (AI Service)
+```bash
 cd ../agent
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 uvicorn main:app --reload --host 127.0.0.1 --port 8001
-
-
-4. Frontend (Next.js)
-bash
-cd ../frontend
-npm install
-npm run dev
-# Open http://localhost:3000
-
-
-Default ports:
-- Backend: 8000
-- Agent: 8001
-- Frontend: 3000
-
-## How it works (high level)
-
-- Frontend calls internal API routes under frontend/app/api/* which proxy to the backend or agent.
-- Backend serves consolidated and normalized data (mock JSON or Nessie).
-- Agent accepts user queries + relevant transactions, uses LLM to return structured analyses and optional chart descriptors consumed by the UI.
-
-## Project structure (top-level)
-
-- frontend/ — Next.js app, components, hooks, types
-- backend/ — FastAPI app, API logic and mock data (data-*)
-- agent/ — AI agent service and analysis generator
-- .env — environment variables
-
-## Key files & components
-
-- Frontend:
-  - app/page.tsx, app/api/*/route.ts
-  - components/compact-ai-chat-assistant.tsx
-  - components/agent-response-modal.tsx
-  - lib/hooks.ts, lib/financial-analysis.ts
-  - types/financial.ts
-- Backend:
-  - main.py, run.py, api.py
-  - data-transactions/*.json (mock fixtures)
-- Agent:
-  - main.py
-  - generate_new_graph.py (generate_financial_analysis)
-
-## Mock vs Live data
-
-- Set use_mock=true to use local JSON fixtures under backend/data-*
-- To use Nessie, set use_mock=false and provide NESSIE_API_KEY
-
-## Troubleshooting
-
-- Frontend cannot reach backend → confirm backend at http://127.0.0.1:8000
-- AI responses missing → verify GOOGLE_AI_API_KEY and that agent is running on port 8001
-- Check backend/agent console logs for errors
-
-## Deployment
-
-- Frontend: Vercel (Next.js) recommended
-- Backend & Agent: Docker, cloud VM or serverless Python host — ensure CORS and env vars
-
-## Contributing & License
-
-Built for Capital One HackMTY 2025. Fork and extend. MIT License.
-// filepath: c:\Users\josem\OneDrive\Escritorio\lkl\HackMTY-2025\README.md
-
-# Capital One HackMTY 2025 — Personal Expense Dashboard
-
-A Next.js personal finance dashboard that integrates a FastAPI backend and an AI Agent service to provide insights, transaction analysis, and debt management suggestions.
-
-## Overview
-
-This project demonstrates a full-stack personal finance product:
-- Frontend: Next.js + TypeScript UI for accounts, transactions, charts and an AI assistant.
-- Backend: FastAPI endpoints serving accounts, transactions, loans and credit data (mockable or via Nessie).
-- Agent: FastAPI AI service that formats LLM responses (Google Gemini) into actionable insights.
-
-## Key features
-
-- Real-time dashboard: net worth, income vs expenses, liabilities.
-- Transaction table with search and pagination.
-- AI assistant: natural-language queries for personalized recommendations and charts.
-- Debt overview: loans, credit score and payoff suggestions.
-- Mock data support for offline development.
-
-## Tech stack
-
-- Frontend: Next.js 16, React 19, TypeScript, Tailwind CSS
-- Backend: FastAPI, Python 3.10+
-- Agent: FastAPI + Google Generative AI (optional)
-- Charts: Recharts
-
-## Prerequisites
-
-- Node.js >= 18 and npm
-- Python 3.10+
-- Optional: Google Gemini API key for AI features
-
-## Environment
-
-Create a .env at repo root or use .env.local. Common variables:
-- GOOGLE_AI_API_KEY (optional, for agent)
-- NESSIE_API_KEY (optional, for live data)
-- use_mock (true to use included JSON fixtures)
-
-## Quick start (local development)
-
-1. Clone repository
-bash
-git clone https://github.com/LeonardoCerv/HackMTY-2025.git
-cd HackMTY-2025
-
-
-2. Backend (FastAPI)
-bash
-cd backend
-python -m venv .venv
-# Windows:
-.venv\Scripts\activate
-pip install -r requirements.txt
-# Run:
-python run.py
-# or:
-uvicorn main:app --reload --host 127.0.0.1 --port 8000
-
-
-3. Agent (AI service)
-bash
-cd ../agent
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn main:app --reload --host 127.0.0.1 --port 8001
-
-
-4. Frontend (Next.js)
-bash
-cd ../frontend
-npm install
-npm run dev
-# Open http://localhost:3000
 ```
 
-Default ports:
-- Backend: 8000
-- Agent: 8001
-- Frontend: 3000
+### 4️⃣ Frontend (Next.js)
+```bash
+cd ../frontend
+npm install
+npm run dev
+```
 
-## How it works (high level)
+Then open 👉 [http://localhost:3000](http://localhost:3000)
 
-- Frontend calls internal API routes under frontend/app/api/* which proxy to the backend or agent.
-- Backend serves consolidated and normalized data (mock JSON or Nessie).
-- Agent accepts user queries + relevant transactions, uses LLM to return structured analyses and optional chart descriptors consumed by the UI.
+**Default Ports:**
+- Frontend → `3000`  
+- Backend → `8000`  
+- Agent → `8001`
 
-## Project structure (top-level)
+---
 
-- frontend/ — Next.js app, components, hooks, types
-- backend/ — FastAPI app, API logic and mock data (data-*)
-- agent/ — AI agent service and analysis generator
-- .env — environment variables
+## 🧩 How It Works
 
-## Key files & components
+1. **Frontend** calls internal API routes (`app/api/*`) which proxy to the backend or AI agent.  
+2. **Backend** aggregates financial data (mock JSON or Nessie API).  
+3. **Agent** receives natural-language queries + transaction context, processes them via **Gemini**, and returns structured financial insights with optional chart data.  
 
-- Frontend:
-  - app/page.tsx, app/api/*/route.ts
-  - components/compact-ai-chat-assistant.tsx
-  - components/agent-response-modal.tsx
-  - lib/hooks.ts, lib/financial-analysis.ts
-  - types/financial.ts
-- Backend:
-  - main.py, run.py, api.py
-  - data-transactions/*.json (mock fixtures)
-- Agent:
-  - main.py
-  - generate_new_graph.py (generate_financial_analysis)
+---
 
-## Mock vs Live data
+## 📁 Project Structure
 
-- Set use_mock=true to use local JSON fixtures under backend/data-*
-- To use Nessie, set use_mock=false and provide NESSIE_API_KEY
+```
+HackMTY-2025/
+├── frontend/   # Next.js app, components, hooks, and API routes
+├── backend/    # FastAPI app, endpoints, and mock JSON data
+├── agent/      # AI analysis microservice using Google Gemini
+└── .env        # Environment variables
+```
 
-## Troubleshooting
+### 🧱 Key Files
+**Frontend**
+- `app/page.tsx`, `app/api/*/route.ts` — Core UI & API proxies  
+- `components/ai-chat-assistant.tsx` — Conversational AI  
+- `lib/financial-analysis.ts` — Data formatting & insights logic  
 
-- Frontend cannot reach backend → confirm backend at http://127.0.0.1:8000
-- AI responses missing → verify GOOGLE_AI_API_KEY and that agent is running on port 8001
-- Check backend/agent console logs for errors
+**Backend**
+- `main.py`, `run.py`, `routers/api_router.py` — REST endpoints  
+- `data-transactions/*.json` — Mock fixtures  
 
-## Deployment
+**Agent**
+- `main.py` — AI entrypoint  
+- `generate_new_graph.py` — LLM financial analysis  
 
-- Frontend: Vercel (Next.js) recommended
-- Backend & Agent: Docker, cloud VM or serverless Python host — ensure CORS and env vars
+---
 
-## Contributing & License
+## 🧰 Mock vs Live Data
 
-Built for Capital One HackMTY 2025. Fork and extend. MIT License.
+| Mode | Description |
+|------|--------------|
+| `use_mock=true` | Uses bundled JSON data under `backend/data-*` |
+| `use_mock=false` | Fetches live data using the Nessie API (requires key) |
+
+---
+
+## 🧾 Troubleshooting
+
+| Issue | Fix |
+|--------|-----|
+| Frontend can’t reach backend | Ensure FastAPI runs on `http://127.0.0.1:8000` |
+| Missing AI responses | Check that the **Agent** is running (`:8001`) and `GOOGLE_AI_API_KEY` is set |
+| CORS errors | Verify CORS middleware in both backend and agent |
+
+---
+
+## ☁️ Deployment
+
+**Recommended Setup:**
+- Frontend → [Vercel](https://vercel.com)  
+- Backend & Agent → Docker or any Python-compatible cloud (AWS, Render, Railway, etc.)
+
+Ensure all environment variables are properly configured in each environment.
+
+---
+
+## 💬 Example AI Queries
+
+Try asking the assistant:
+
+- “Which recurring expenses are affecting my savings most?”  
+- “How can I reduce my monthly spending?”  
+- “What’s my debt payoff timeline?”  
+- “Am I saving enough for emergencies?”
+
+---
+
+## 🤝 Contributing
+
+Built with ❤️ for **Capital One HackMTY 2025**.  
+Contributions and forks are welcome!  
+
+---
+
+## 📜 License
+
+[MIT License](LICENSE)
