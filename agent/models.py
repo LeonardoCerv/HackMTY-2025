@@ -19,4 +19,4 @@ class Graph(GraphBase):
 class AgentAnalysisResponse(BaseModel):
     chart: Optional[Graph] = None  # Optional chart generation
     analysis: str  # LLM-style text analysis
-    justification: str  # Why this chart/data was chosen
+    userQuery: str  # The user's original query

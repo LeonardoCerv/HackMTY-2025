@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Search, Filter, ChevronDown } from 'lucide-react'
+import { Search, Receipt } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 
 interface Transaction {
@@ -39,8 +39,6 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([])
   const [searchTerm, setSearchTerm] = useState('')
-  const [typeFilter, setTypeFilter] = useState<string>('all')
-  const [showFilters, setShowFilters] = useState(false)
   const [loading, setLoading] = useState(true)
 
   const [currentPage, setCurrentPage] = useState(1)
@@ -81,7 +79,7 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
 
     setFilteredTransactions(filtered)
     setCurrentPage(1)
-  }, [transactions, searchTerm, typeFilter])
+  }, [transactions, searchTerm])
 
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount)
@@ -96,7 +94,7 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
       <Card className={className}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-sm">
-            <Filter className="h-5 w-5" />
+            <Receipt className="h-5 w-5" />
             Recent Transactions
           </CardTitle>
         </CardHeader>
@@ -113,7 +111,7 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
     <Card className={`${className} flex flex-col h-full`}>
       <CardHeader className="flex-shrink-0">
         <CardTitle className="flex items-center gap-2 text-sm font-semibold">
-          <Filter className="h-5 w-5" />
+          <Receipt className="h-5 w-5" />
           Recent Transactions
         </CardTitle>
 
@@ -126,30 +124,6 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 text-xs"
             />
-          </div>
-
-          <div className="flex items-center gap-2 text-xs">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 text-xs"
-            >
-              <Filter className="h-4 w-4" />
-              Filters
-              <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-            </Button>
-
-            {typeFilter !== 'all' && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setTypeFilter('all')}
-                className="text-muted-foreground text-xs"
-              >
-                Clear filters
-              </Button>
-            )}
           </div>
         </div>
       </CardHeader>

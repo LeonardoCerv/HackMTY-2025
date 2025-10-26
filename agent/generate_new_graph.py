@@ -22,8 +22,7 @@ RESPONSE FORMAT REQUIREMENTS:
 Return a JSON object with exactly these keys:
 {
   "chart": null or {chart object},  // Optional chart generation
-  "analysis": "string",             // LLM-style detailed analysis
-  "justification": "string"         // Why this chart/data was chosen
+  "analysis": "string"              // LLM-style detailed analysis
 }
 
 Chart object format (when included):
@@ -53,13 +52,14 @@ Analysis Requirements:
 - Provide clear, simple, and concise financial insights that anyone can understand
 - Use PLAIN TEXT ONLY - NO markdown, NO asterisks (*), NO special formatting characters
 - NO bullet points with asterisks, NO bold/italic markers, NO formatting symbols
-- Use proper paragraphs and line breaks for readability and visual separation
+- Use proper paragraphs and line breaks for readability and visual separation - format ALL responses nicely with clear structure
 - Include specific numbers and key trends from the data
 - Give practical, actionable recommendations
 - Keep analysis under 150 words - be direct and focus on the most important insights only
-- Make it easy to read with natural spacing
+- Make it easy to read with natural spacing and clear organization
 - Tailor all insights to the user's specific transaction history and spending patterns - reference their actual data
 - Make recommendations based on their personal financial behavior, not generic advice
+- For improvement questions (like credit score, savings, spending), provide step-by-step guidance with numbered steps and specific actions
 
 Justification Requirements:
 - Keep it very brief: 1-2 simple sentences explaining why this chart type was chosen
@@ -81,7 +81,7 @@ def _build_analysis_prompt(user_request: str, transaction_data: List[Dict[str, A
         f"Total transactions available: {len(transaction_data) if transaction_data else 0}\n\n"
         f"Analyze their specific financial behavior and provide personalized insights based on their actual transaction history.\n\n"
         f"{ANALYSIS_SCHEMA_INSTRUCTIONS}\n\n"
-        "CRITICAL: Return responses in PLAIN TEXT ONLY. Absolutely NO asterisks (*), NO markdown, NO special formatting characters. Use line breaks and paragraphs for separation. Analysis should be simple and clear, justifications can be more technical but keep the overall justification very brief (1-2 sentences). Chart justifications should be very short as specified."
+        "CRITICAL: Return responses in PLAIN TEXT ONLY. Absolutely NO asterisks (*), NO markdown, NO special formatting characters. Use line breaks and paragraphs for separation. Analysis should be simple and clear. Chart justifications should be very short as specified."
     )
 
 def extract_json(text: str) -> Optional[str]:
@@ -99,7 +99,7 @@ def extract_json(text: str) -> Optional[str]:
                 return text[start:i+1]
     return None
 
-def call_gemini_analysis(prompt: str) -> AgentAnalysisResponse:
+def call_gemini_analysis(prompt: str, user_request: str) -> AgentAnalysisResponse:
     api_key = os.getenv("GOOGLE_API_KEY")
     if not api_key:
         raise RuntimeError("GOOGLE_API_KEY is not set")
@@ -128,8 +128,31 @@ def call_gemini_analysis(prompt: str) -> AgentAnalysisResponse:
         if json_str:
             try:
                 data = json.loads(json_str)
-            except json.JSONDecodeError as e:
-                raise RuntimeError(f"Failed to parse extracted JSON: {e}: {json_str[:200]}")
+            except json.JSONDecodeError:
+                # Try to find JSON in code blocks
+                import re
+                code_blocks = re.findall(r'```(?:json)?\n?(.*?)\n?```', text, re.DOTALL)
+                for block in code_blocks:
+                    try:
+                        data = json.loads(block.strip())
+                        break
+                    except json.JSONDecodeError:
+                        continue
+                else:
+                    # Last resort: try to extract analysis with regex
+                    import re
+                    analysis_match = re.search(r'"analysis"\s*:\s*"([^"]*(?:\\.[^"]*)*)"', text, re.DOTALL)
+                    if analysis_match:
+                        analysis = analysis_match.group(1)
+                        # Check for chart
+                        chart_match = re.search(r'"chart"\s*:\s*(null|\{[^}]*\})', text, re.DOTALL)
+                        chart = None
+                        if chart_match and chart_match.group(1) != 'null':
+                            # Try to parse chart, but for now set to None
+                            pass
+                        data = {"analysis": analysis, "chart": chart}
+                    else:
+                        raise RuntimeError(f"Failed to extract analysis from response: {text[:200]}")
         else:
             # Fallback: try to strip code fences
             if text.startswith("```"):
@@ -145,11 +168,22 @@ def call_gemini_analysis(prompt: str) -> AgentAnalysisResponse:
                 try:
                     data = json.loads(text_stripped)
                 except Exception:
-                    raise RuntimeError(f"Failed to parse LLM JSON after stripping fences: {e}: {text[:200]}")
-            else:
-                raise RuntimeError(f"Failed to parse LLM JSON: {e}: {text[:200]}")
-
-    # Handle the chart field - it can be null or a chart object
+                    raise RuntimeError(f"Failed to parse LLM JSON after stripping fences: {text[:200]}")
+                else:
+                    # Last resort: try to extract analysis with regex
+                    import re
+                    analysis_match = re.search(r'"analysis"\s*:\s*"([^"]*(?:\\.[^"]*)*)"', text, re.DOTALL)
+                    if analysis_match:
+                        analysis = analysis_match.group(1)
+                        # Check for chart
+                        chart_match = re.search(r'"chart"\s*:\s*(null|\{[^}]*\})', text, re.DOTALL)
+                        chart = None
+                        if chart_match and chart_match.group(1) != 'null':
+                            # Try to parse chart, but for now set to None
+                            pass
+                        data = {"analysis": analysis, "chart": chart}
+                    else:
+                        raise RuntimeError(f"Failed to extract analysis from response: {text[:200]}")    # Handle the chart field - it can be null or a chart object
     try:
         if data.get("chart") and isinstance(data["chart"], dict):
             # Create a Graph object from the chart data
@@ -174,7 +208,7 @@ def call_gemini_analysis(prompt: str) -> AgentAnalysisResponse:
         analysis_response = AgentAnalysisResponse(
             chart=chart,
             analysis=data["analysis"],
-            justification=data["justification"]
+            userQuery=user_request
         )
     except ValidationError as e:
         raise RuntimeError(f"LLM returned invalid response schema: {e}")
@@ -196,6 +230,6 @@ async def generate_financial_analysis(
         transaction_data = []
 
     prompt = _build_analysis_prompt(user_request, transaction_data)
-    return call_gemini_analysis(prompt)
+    return call_gemini_analysis(prompt, user_request)
 
 

@@ -1,9 +1,7 @@
 import { CompactDashboardHeader } from "@/components/compact-dashboard-header"
-import { CompactEarningsSection } from "@/components/compact-earnings-section"
-import { CompactExpensesSection } from "@/components/compact-expenses-section"
+import { CompactIncomeExpensesSection } from "@/components/compact-income-expenses-section"
 import { CompactAIChatAssistant } from "@/components/compact-ai-chat-assistant"
-import { CompactDebtSection } from "@/components/compact-debt-section"
-import { CompactCreditScoreSection } from "@/components/compact-credit-score-section"
+import { CombinedLoansCreditSection } from "@/components/combined-loans-credit-section"
 import { TransactionsTable } from "@/components/transactions-table"
 
 export const dynamic = 'force-dynamic'
@@ -25,12 +23,10 @@ export default function Home() {
             {/* Chat Input at the top - compact */}
             <CompactAIChatAssistant />
 
-            {/* 2x2 Grid: earnings, expenses, debt, credit score */}
-            <div className="flex-1 grid gap-2 grid-cols-2 grid-rows-2">
-              <CompactEarningsSection />
-              <CompactExpensesSection />
-              <CompactDebtSection />
-              <CompactCreditScoreSection />
+            {/* 2x1 Grid: income-expenses, loans-credit */}
+            <div className="flex-1 grid gap-2 grid-cols-2">
+              <CompactIncomeExpensesSection />
+              <CombinedLoansCreditSection />
             </div>
           </div>
         </div>
