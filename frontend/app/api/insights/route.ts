@@ -35,8 +35,8 @@ export async function POST(request: Request) {
     // Transform the response to match expected frontend format
     return NextResponse.json({
       analysis: analysisResult.analysis,
-      justification: analysisResult.justification,
       chart: analysisResult.chart, // Optional chart data
+      userQuery: question, // Include the user's question
       success: true
     })
 

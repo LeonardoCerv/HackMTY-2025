@@ -24,7 +24,6 @@ interface ChartData {
 
 interface AgentResponse {
   analysis: string
-  justification: string
   chart?: ChartData
   success: boolean
   userQuery?: string
@@ -43,28 +42,17 @@ export function AgentResponseModal({ open, onOpenChange, response }: AgentRespon
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">
-            Financial Analysis
-          </DialogTitle>
           <DialogDescription>
-            AI-powered insights based on your transaction data
+            Your question:
           </DialogDescription>
+          <DialogTitle className="text-2xl font-bold">
+            {response.userQuery && (
+              <>{response.userQuery}</>
+          )}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 p-6">
-          {/* User Query Section */}
-          {response.userQuery && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-base font-semibold">
-                <span>User Query</span>
-              </div>
-              <div className="rounded-lg border border-border bg-secondary/30 p-4">
-                <div className="text-sm text-card-foreground leading-relaxed whitespace-pre-wrap">
-                  {response.userQuery}
-                </div>
-              </div>
-            </div>
-          )}
 
           {response.chart ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -108,59 +96,25 @@ export function AgentResponseModal({ open, onOpenChange, response }: AgentRespon
                   <span>Detailed Analysis</span>
                 </div>
                 
-                <div className="rounded-lg border border-border bg-secondary/30 p-4">
-                  <div className="text-sm text-card-foreground leading-relaxed whitespace-pre-wrap">
+                <div className="rounded-lg p-4">
+                  <div className="text-sm text-card-foreground leading-relaxed whitespace-pre-wrap leading-relaxed font-extralight">
                     {response.analysis}
                   </div>
                 </div>
-
-                {/* Justification below analysis */}
-                {response.justification && (
-                  <div className="rounded-lg border border-border/50 bg-muted/20 p-3">
-                    <div className="flex items-start gap-2">
-                      <Info className="h-4 w-4 text-white flex-shrink-0 mt-0.5" />
-                      <div className="flex-1">
-                        <div className="text-xs font-medium text-white mb-1">
-                          justification
-                        </div>
-                        <div className="text-xs text-muted-foreground/80 leading-relaxed whitespace-pre-wrap">
-                          {response.justification}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           ) : (
             <div className="space-y-3">
-              <div className="flex items-center gap-2 text-base font-semibold">
-                <Lightbulb className="h-8 w-8 text-white bg-primary p-1 rounded-md" />
-                <span>Detailed Analysis</span>
-              </div>
-              
-              <div className="rounded-lg border border-border bg-secondary/30 p-4">
-                <div className="text-sm text-card-foreground leading-relaxed whitespace-pre-wrap">
-                  {response.analysis}
+               <div className="flex items-center gap-2 text-base font-semibold">
+                  <Lightbulb className="h-8 w-8 text-white bg-primary p-1 rounded-md" />
+                  <span>Detailed Analysis</span>
                 </div>
-              </div>
-
-              {/* Justification below analysis */}
-              {response.justification && (
-                <div className="rounded-lg border border-border/50 bg-muted/20 p-3">
-                  <div className="flex items-start gap-2">
-                    <Info className="h-4 w-4 text-white flex-shrink-0 mt-0.5" />
-                    <div className="flex-1">
-                      <div className="text-xs font-medium text-white mb-1">
-                        justification
-                      </div>
-                      <div className="text-xs text-muted-foreground/80 leading-relaxed whitespace-pre-wrap">
-                        {response.justification}
-                      </div>
-                    </div>
+                
+                <div className="rounded-lg p-4">
+                  <div className="text-sm text-card-foreground leading-relaxed whitespace-pre-wrap leading-relaxed font-extralight">
+                    {response.analysis}
                   </div>
                 </div>
-              )}
             </div>
           )}
 

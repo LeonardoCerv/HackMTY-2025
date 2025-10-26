@@ -22,9 +22,9 @@ interface ChartData {
 
 interface AgentResponse {
   analysis: string
-  justification: string
   chart?: ChartData
   success: boolean
+  userQuery?: string
 }
 
 export function CompactAIChatAssistant() {
@@ -70,7 +70,6 @@ export function CompactAIChatAssistant() {
       } else {
         setResponse({
           analysis: data.error || "Sorry, I couldn't process your request.",
-          justification: "",
           success: false
         })
         setIsModalOpen(true) // Open modal even for errors
@@ -78,7 +77,6 @@ export function CompactAIChatAssistant() {
     } catch {
       setResponse({
         analysis: "Sorry, I'm having trouble connecting. Please try again.",
-        justification: "",
         success: false
       })
       setIsModalOpen(true) // Open modal for connection errors
