@@ -1,4 +1,4 @@
-# 💰 Capital One HackMTY 2025 — Personal Expense Dashboard
+# 💰 Capital One HackMTY 2025 
 
 A full-stack personal finance dashboard demonstrating how to combine a modern React/Next frontend, FastAPI backend, and an AI-powered analysis microservice to visualize transactions, income, expenses, and debt and to provide natural-language financial insights.
 
