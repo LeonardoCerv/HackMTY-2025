@@ -100,9 +100,9 @@ def extract_json(text: str) -> Optional[str]:
     return None
 
 def call_gemini_analysis(prompt: str, user_request: str) -> AgentAnalysisResponse:
-    api_key = os.getenv("GOOGLE_API_KEY")
+    api_key = os.getenv("GOOGLE_AI_API_KEY")
     if not api_key:
-        raise RuntimeError("GOOGLE_API_KEY is not set")
+        raise RuntimeError("GOOGLE_AI_API_KEY is not set")
 
     if genai is None:
         raise RuntimeError(
@@ -231,5 +231,3 @@ async def generate_financial_analysis(
 
     prompt = _build_analysis_prompt(user_request, transaction_data)
     return call_gemini_analysis(prompt, user_request)
-
-

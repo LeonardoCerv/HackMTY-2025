@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     }
 
     // Call the backend agent for comprehensive analysis
-    const backendUrl = process.env.AGENT_URL || 'http://localhost:8001'
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000'
     const response = await fetch(`${backendUrl}/api/generate-analysis`, {
       method: 'POST',
       headers: {
