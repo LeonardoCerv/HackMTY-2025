@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
-    const res = await fetch(`http://127.0.0.1:8000/api/credit-score`);
+    const res = await fetch(`http://127.0.0.1:8000/api/loans-credit-summary`);
     
     if (!res.ok) {
       const errorText = await res.text();
@@ -16,9 +16,9 @@ export async function GET(request: NextRequest) {
     const data = await res.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error fetching credit score:", error);
+    console.error("Error fetching loans credit summary:", error);
     return NextResponse.json(
-      { error: "No se pudo obtener el credit score", details: String(error) }, 
+      { error: "No se pudo obtener el resumen", details: String(error) }, 
       { status: 500 }
     );
   }

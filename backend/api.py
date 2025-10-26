@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+from datetime import datetime
 
 # Crear un router en lugar de usar app directamente
 router = APIRouter()
@@ -162,8 +163,8 @@ def get_accounts() -> Dict[str, Any]:
         )
 
 @router.get("/api/loans")   
-def get_loans() ->  Dict[str, Any]:
-    """Obtiene todos los préstamos de Nessie."""
+def get_loans() -> Dict[str, Any]:
+    """Obtiene todos los préstamos con información detallada."""
 
     customers_url = f"{NESSIE_BASE_URL}/customers?key={NESSIE_API_KEY}"
     customers = fetch_from_nessie(customers_url)
@@ -176,6 +177,7 @@ def get_loans() ->  Dict[str, Any]:
     customer_name = f"{customer.get('first_name', '')} {customer.get('last_name', '')}".strip()
 
     print(f"Cliente seleccionado: {customer_name} (ID: {customer_id})")
+    
     accounts_url = f"{NESSIE_BASE_URL}/customers/{customer_id}/accounts?key={NESSIE_API_KEY}"
     accounts = fetch_from_nessie(accounts_url)
 
@@ -184,7 +186,7 @@ def get_loans() ->  Dict[str, Any]:
 
     account = accounts[0]
     account_id = account["_id"]
-    account_type = account.get("account_type", "N/A")
+    account_type = account.get("type", "N/A")
     nickname = account.get("nickname", "N/A")
 
     print(f"Cuenta seleccionada: {nickname} (ID: {account_id}, Tipo: {account_type})")
@@ -196,12 +198,131 @@ def get_loans() ->  Dict[str, Any]:
     if not loans:
         raise HTTPException(status_code=404, detail="No se encontraron préstamos en Nessie.")   
     
-    loan = loans[-1]
-    credit_score = loan.get("credit_score", "N/A")
+    # Calcular métricas de préstamos
+    total_loan_amount = sum(loan.get("amount", 0) for loan in loans)
+    total_monthly_payments = sum(loan.get("monthly_payment", 0) for loan in loans)
+    
+    loan = loans[0]
+    credit_score = loan.get("credit_score", 0)
     print(f"Préstamo seleccionado: ID {loan['_id']} con puntaje crediticio {credit_score}") 
 
     return {
         "loans": loans,
-        "credit_score": credit_score,
-        "total_loans": len(loans)
+        "total_loans": len(loans),
+        "total_loan_amount": total_loan_amount,
+        "total_monthly_payments": total_monthly_payments,
+        "average_credit_score": credit_score
+    }
+
+@router.get("/api/credit-score")
+def get_credit_score() -> Dict[str, Any]:
+    """Obtiene el puntaje crediticio con información detallada."""
+    
+    customers_url = f"{NESSIE_BASE_URL}/customers?key={NESSIE_API_KEY}"
+    customers = fetch_from_nessie(customers_url)
+
+    if not customers:
+        raise HTTPException(status_code=404, detail="No se encontraron clientes en Nessie.")
+
+    customer = customers[0]
+    customer_id = customer["_id"]
+
+    accounts_url = f"{NESSIE_BASE_URL}/customers/{customer_id}/accounts?key={NESSIE_API_KEY}"
+    accounts = fetch_from_nessie(accounts_url)
+
+    if not accounts:
+        raise HTTPException(status_code=404, detail="No se encontraron cuentas en Nessie.")
+
+    account = accounts[0]
+    account_id = account["_id"]
+
+    nessie_url = f"{NESSIE_BASE_URL}/accounts/{account_id}/loans?key={NESSIE_API_KEY}"
+    loans = fetch_from_nessie(nessie_url)
+
+    if not loans:
+        raise HTTPException(status_code=404, detail="No se encontraron préstamos en Nessie.")
+    
+    # Obtener el credit score del primer préstamo
+    loan = loans[0]
+    credit_score = loan.get("credit_score", 0)
+    
+    # Determinar el rango según el puntaje
+    def get_score_range(score: int) -> str:
+        if score >= 800:
+            return "Exceptional"
+        elif score >= 740:
+            return "Very Good"
+        elif score >= 670:
+            return "Good"
+        elif score >= 580:
+            return "Fair"
+        else:
+            return "Poor"
+    
+    return {
+        "creditScore": credit_score,
+        "scoreRange": get_score_range(credit_score),
+        "lastUpdated": datetime.now().isoformat()
+    }
+
+@router.get("/api/loans-credit-summary")
+def get_loans_credit_summary() -> Dict[str, Any]:
+    """Obtiene un resumen completo de préstamos y credit score."""
+    
+    customers_url = f"{NESSIE_BASE_URL}/customers?key={NESSIE_API_KEY}"
+    customers = fetch_from_nessie(customers_url)
+
+    if not customers:
+        raise HTTPException(status_code=404, detail="No se encontraron clientes en Nessie.")
+
+    customer = customers[0]
+    customer_id = customer["_id"]
+    customer_name = f"{customer.get('first_name', '')} {customer.get('last_name', '')}".strip()
+
+    accounts_url = f"{NESSIE_BASE_URL}/customers/{customer_id}/accounts?key={NESSIE_API_KEY}"
+    accounts = fetch_from_nessie(accounts_url)
+
+    if not accounts:
+        raise HTTPException(status_code=404, detail="No se encontraron cuentas en Nessie.")
+
+    account = accounts[0]
+    account_id = account["_id"]
+
+    nessie_url = f"{NESSIE_BASE_URL}/accounts/{account_id}/loans?key={NESSIE_API_KEY}"
+    loans = fetch_from_nessie(nessie_url)
+
+    if not loans:
+        raise HTTPException(status_code=404, detail="No se encontraron préstamos en Nessie.")
+    
+    # Calcular métricas
+    total_loan_amount = sum(loan.get("amount", 0) for loan in loans)
+    total_monthly_payments = sum(loan.get("monthly_payment", 0) for loan in loans)
+    credit_score = loans[0].get("credit_score", 0)
+    
+    def get_score_range(score: int) -> str:
+        if score >= 800:
+            return "Exceptional"
+        elif score >= 740:
+            return "Very Good"
+        elif score >= 670:
+            return "Good"
+        elif score >= 580:
+            return "Fair"
+        else:
+            return "Poor"
+    
+    return {
+        "customer_name": customer_name,
+        "loans": {
+            "total_loans": len(loans),
+            "total_loan_amount": total_loan_amount,
+            "total_monthly_payments": total_monthly_payments,
+            "active_loans": len([l for l in loans if l.get("status") == "pending"]),
+            "loans_detail": loans
+        },
+        "credit_score": {
+            "score": credit_score,
+            "range": get_score_range(credit_score),
+            "last_updated": datetime.now().isoformat()
+        }
     }

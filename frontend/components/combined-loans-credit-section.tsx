@@ -2,8 +2,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useState, useEffect } from 'react'
-import { useAccounts } from '@/lib/hooks'
-import { Account } from '@/types/financial'
 import { DollarSign } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
 
@@ -13,22 +11,18 @@ interface CreditScoreData {
   lastUpdated: string
 }
 
-interface LoanTransaction {
-  account_id: string
-  account_type: string
-  nickname: string
-  amount: number
-  positive: boolean
-  transaction_date: string
-  description: string
-  type: string
+interface LoansData {
+  loans: any[]
+  total_loans: number
+  total_loan_amount: number
+  total_monthly_payments: number
+  average_credit_score: number
 }
 
 export function CombinedLoansCreditSection() {
-  const { accounts } = useAccounts()
   const [creditScore, setCreditScore] = useState<CreditScoreData | null>(null)
+  const [loansData, setLoansData] = useState<LoansData | null>(null)
   const [creditLoading, setCreditLoading] = useState(true)
-  const [loanTransactions, setLoanTransactions] = useState<LoanTransaction[]>([])
   const [loansLoading, setLoansLoading] = useState(true)
 
   // Fetch credit score
@@ -36,6 +30,9 @@ export function CombinedLoansCreditSection() {
     const fetchCreditScore = async () => {
       try {
         const response = await fetch('/api/credit-score')
+        if (!response.ok) {
+          throw new Error('Failed to fetch credit score')
+        }
         const data = await response.json()
         setCreditScore(data)
       } catch (error) {
@@ -48,39 +45,25 @@ export function CombinedLoansCreditSection() {
     fetchCreditScore()
   }, [])
 
-  // Fetch loan transactions
+  // Fetch loans data
   useEffect(() => {
-    const fetchLoanTransactions = async () => {
+    const fetchLoans = async () => {
       try {
-        const response = await fetch('/api/transactions')
+        const response = await fetch('/api/loans')
+        if (!response.ok) {
+          throw new Error('Failed to fetch loans')
+        }
         const data = await response.json()
-        const allTransactions: LoanTransaction[] = data.transactions.map((tx: any) => ({
-          account_id: tx.account_id ?? 'unknown_account',
-          account_type: tx.account_type ?? 'Unknown',
-          nickname: tx.nickname ?? tx.account_name ?? '—',
-          amount: typeof tx.amount === 'number' ? tx.amount : Number(tx.amount ?? 0),
-          positive: typeof tx.positive === 'boolean' ? tx.positive : (tx.positive === 'true' || (tx.amount && Number(tx.amount) >= 0)),
-          transaction_date: tx.transaction_date ?? tx.date ?? new Date().toISOString(),
-          description: tx.description ?? tx.memo ?? '—',
-          type: tx.type ?? 'unknown'
-        }))
-        const loans = allTransactions.filter(tx => tx.type === 'loan')
-        setLoanTransactions(loans)
+        setLoansData(data)
       } catch (error) {
-        console.error('Failed to fetch loan transactions:', error)
+        console.error('Failed to fetch loans:', error)
       } finally {
         setLoansLoading(false)
       }
     }
 
-    fetchLoanTransactions()
+    fetchLoans()
   }, [])
-
-  // Calculate debt metrics from loan transactions
-  const loanAccounts = accounts.filter((acc: Account) => acc.type === 'loan')
-  const totalLoanAmount = loanTransactions.reduce((sum: number, tx: LoanTransaction) => sum + tx.amount, 0)
-  const monthlyPayments = loanAccounts.reduce((sum: number, acc: Account) => sum + (acc.monthlyPayment || 0), 0)
-  const numberOfLoans = loanTransactions.length
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -101,6 +84,14 @@ export function CombinedLoansCreditSection() {
     const min = 300
     const max = 850
     return ((score - min) / (max - min)) * 100
+  }
+
+  const getGradientColors = (score: number) => {
+    if (score >= 800) return { start: '#10b981', end: '#059669' }
+    if (score >= 740) return { start: '#3b82f6', end: '#2563eb' }
+    if (score >= 670) return { start: '#f59e0b', end: '#d97706' }
+    if (score >= 580) return { start: '#f97316', end: '#ea580c' }
+    return { start: '#ef4444', end: '#dc2626' }
   }
 
   if (creditLoading || loansLoading) {
@@ -136,11 +127,11 @@ export function CombinedLoansCreditSection() {
             <h4 className="text-sm font-semibold text-card-foreground">Loans Overview</h4>
 
             <div className="flex-1 space-y-3">
-              {/* Remaining Balance */}
+              {/* Total Remaining Balance */}
               <div className="rounded-lg bg-red-50 dark:bg-red-950/20 p-3 border border-red-200 dark:border-red-800">
                 <p className="text-xs font-medium text-muted-foreground mb-1">Total Remaining Balance</p>
                 <p className="text-lg font-bold text-red-600 dark:text-red-400">
-                  {formatCurrency(totalLoanAmount)}
+                  {loansData ? formatCurrency(loansData.total_loan_amount) : '$0.00'}
                 </p>
               </div>
 
@@ -148,15 +139,15 @@ export function CombinedLoansCreditSection() {
               <div className="rounded-lg bg-blue-50 dark:bg-blue-950/20 p-3 border border-blue-200 dark:border-blue-800">
                 <p className="text-xs font-medium text-muted-foreground mb-1">Monthly Payments</p>
                 <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                  {formatCurrency(monthlyPayments)}
+                  {loansData ? formatCurrency(loansData.total_monthly_payments) : '$0.00'}
                 </p>
               </div>
 
-              {/* Number of Loans */}
+              {/* Number of Active Loans */}
               <div className="rounded-lg bg-green-50 dark:bg-green-950/20 p-3 border border-green-200 dark:border-green-800">
                 <p className="text-xs font-medium text-muted-foreground mb-1">Active Loans</p>
                 <p className="text-lg font-bold text-green-600 dark:text-green-400">
-                  {numberOfLoans}
+                  {loansData ? loansData.total_loans : 0}
                 </p>
               </div>
             </div>
@@ -184,8 +175,8 @@ export function CombinedLoansCreditSection() {
                     {/* Progress circle with gradient */}
                     <defs>
                       <linearGradient id="creditGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor={getScoreColor(creditScore.creditScore).includes('green') ? '#10b981' : getScoreColor(creditScore.creditScore).includes('blue') ? '#3b82f6' : getScoreColor(creditScore.creditScore).includes('yellow') ? '#f59e0b' : getScoreColor(creditScore.creditScore).includes('orange') ? '#f97316' : '#ef4444'} />
-                        <stop offset="100%" stopColor={getScoreColor(creditScore.creditScore).includes('green') ? '#059669' : getScoreColor(creditScore.creditScore).includes('blue') ? '#2563eb' : getScoreColor(creditScore.creditScore).includes('yellow') ? '#d97706' : getScoreColor(creditScore.creditScore).includes('orange') ? '#ea580c' : '#dc2626'} />
+                        <stop offset="0%" stopColor={getGradientColors(creditScore.creditScore).start} />
+                        <stop offset="100%" stopColor={getGradientColors(creditScore.creditScore).end} />
                       </linearGradient>
                     </defs>
                     <path
