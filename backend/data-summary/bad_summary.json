@@ -1,0 +1,19 @@
+{
+  "loans": [
+    {
+      "_id": "loan_id_002",
+      "type": "Personal Loan",
+      "status": "pending",
+      "amount": 40000.00,
+      "credit_score": 350,
+      "description": "Préstamo Personal de Alto Interés",
+      "monthly_payment": 2500.00,
+      "balance": 35000.00,
+      "maturity_date": "2027-05-01"
+    }
+  ],
+  "total_loans": 1,
+  "total_loan_amount": 40000.00,
+  "total_monthly_payments": 2500.00,
+  "average_credit_score": 350
+}

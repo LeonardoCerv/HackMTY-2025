@@ -15,6 +15,7 @@ NESSIE_API_KEY = "5385334cd89925d890675e8cdd41c9c4"
 NESSIE_BASE_URL = "http://api.nessieisreal.com"
 
 use_mock = os.getenv("use_mock", "false").lower() == "true"
+USER_TYPE = os.getenv("MOCK_USER_TYPE", "good").lower()
 
 def load_mock_json(folder_name: str, file_name: str) -> Dict[str, Any]:
     """Carga datos desde un archivo JSON local, con búsqueda flexible según estructura del proyecto."""
@@ -29,7 +30,7 @@ def load_mock_json(folder_name: str, file_name: str) -> Dict[str, Any]:
         if not json_file_path.exists():
             raise HTTPException(status_code=404, detail=f"Archivo no encontrado: {json_file_path.resolve()}")
 
-        print(f"🧩 Cargando mock desde: {json_file_path.resolve()}")
+        print(f"🧩 Cargando mock de tipo '{USER_TYPE}' desde: {json_file_path.resolve()}")
 
         with open(json_file_path, "r", encoding="utf-8") as file:
             return json.load(file)
@@ -38,6 +39,7 @@ def load_mock_json(folder_name: str, file_name: str) -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail=f"Error en formato JSON: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al cargar JSON: {str(e)}")
+    
 
 
 def fetch_from_nessie(url: str) -> List[Dict[str, Any]]:
@@ -58,7 +60,8 @@ def get_transactions_for_customer():
     Obtiene todas las transacciones del primer cliente disponible.
     """
     if use_mock:
-        return load_mock_json("data-transactions", "good_transactions.json")
+        filename = f"{USER_TYPE}_transactions.json"
+        return load_mock_json("data-transactions", filename)
     
     else:
         # Tu código original con la API de Nessie
@@ -159,7 +162,8 @@ def get_transactions_for_customer():
 def get_loans() -> Dict[str, Any]:
     """Obtiene todos los préstamos con información detallada."""
     if use_mock:
-        return load_mock_json("data-loans", "good_loans.json")  
+        filename = f"{USER_TYPE}_loans.json"
+        return load_mock_json("data-loans", filename)
 
     customers_url = f"{NESSIE_BASE_URL}/customers?key={NESSIE_API_KEY}"
     customers = fetch_from_nessie(customers_url)
@@ -213,7 +217,8 @@ def get_loans() -> Dict[str, Any]:
 def get_credit_score() -> Dict[str, Any]:
     """Obtiene el puntaje crediticio con información detallada."""
     if use_mock:
-        return load_mock_json("data-credit", "good-credit.json")
+        filename = f"{USER_TYPE}_credit.json" 
+        return load_mock_json("data-credit", filename)
     
     customers_url = f"{NESSIE_BASE_URL}/customers?key={NESSIE_API_KEY}"
     customers = fetch_from_nessie(customers_url)
@@ -266,7 +271,8 @@ def get_credit_score() -> Dict[str, Any]:
 def get_loans_credit_summary() -> Dict[str, Any]:
     """Obtiene un resumen completo de préstamos y credit score."""
     if use_mock:
-        return load_mock_json("data-summary", "good_summary.json")
+        filename = f"{USER_TYPE}_summary.json"
+        return load_mock_json("data-summary", filename)
     
     customers_url = f"{NESSIE_BASE_URL}/customers?key={NESSIE_API_KEY}"
     customers = fetch_from_nessie(customers_url)

@@ -1,22 +1,19 @@
 {
   "loans": [
     {
-      "_id": "loan_001",
-      "type": "Home Loan",
+      "_id": "loan_id_001",
+      "type": "Mortgage Loan",
       "status": "pending",
-      "amount": 255000.00,
-      "monthly_payment": 8500.00,
-      "term": 36,
-      "rate": 5.2,
-      "credit_score": 735,
-      "account_id": "acc_loan_001",
-      "customer_id": "c1a2b3c4d5e6f7g8h9i0",
-      "origination_date": "2023-08-15",
-      "due_date": "2026-08-15"
+      "amount": 5000000.00,
+      "credit_score": 820,
+      "description": "Préstamo Hipotecario (Tasa Preferencial)",
+      "monthly_payment": 9500.00,
+      "balance": 2100000.00,
+      "maturity_date": "2035-01-01"
     }
   ],
   "total_loans": 1,
-  "total_loan_amount": 255000.00,
-  "total_monthly_payments": 8500.00,
-  "average_credit_score": 735
+  "total_loan_amount": 5000000.00,
+  "total_monthly_payments": 9500.00,
+  "average_credit_score": 820
 }

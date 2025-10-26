@@ -1,0 +1,19 @@
+{
+  "loans": [
+    {
+      "_id": "loan_id_003",
+      "type": "Auto Loan",
+      "status": "pending",
+      "amount": 150000.00,
+      "credit_score": 685,
+      "description": "Préstamo para vehículo (Tasa Estándar)",
+      "monthly_payment": 3500.00,
+      "balance": 98000.00,
+      "maturity_date": "2028-09-01"
+    }
+  ],
+  "total_loans": 1,
+  "total_loan_amount": 150000.00,
+  "total_monthly_payments": 3500.00,
+  "average_credit_score": 685
+}
