@@ -11,7 +11,6 @@ export function CompactEarningsSection() {
   const { accounts } = useAccounts()
 
   // Calculate metrics
-  const netWorth = accounts.reduce((sum: number, acc: Account) => sum + acc.balance, 0)
   const monthlyIncome = transactions
     .filter((txn: any) => txn.positive === true)
     .reduce((sum: number, txn: any) => sum + txn.amount, 0)
@@ -79,11 +78,7 @@ export function CompactEarningsSection() {
       </CardHeader>
       <CardContent className="space-y-2 px-3 pb-2">
         {/* Key Metrics */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-lg bg-primary/5 p-3 border border-primary/10">
-            <p className="text-xs font-medium text-muted-foreground mb-1">Net Worth</p>
-            <p className="text-base font-bold text-primary">${netWorth.toLocaleString()}</p>
-          </div>
+        <div className="grid grid-cols-1 gap-3">
           <div className="rounded-lg bg-primary/5 p-3 border border-primary/10">
             <p className="text-xs font-medium text-muted-foreground mb-1">Monthly Income</p>
             <p className="text-base font-bold text-primary">${monthlyIncome.toLocaleString()}</p>
@@ -129,7 +124,7 @@ export function CompactEarningsSection() {
           {incomeSources.map((item) => (
             <div key={item.source} className="space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">{item.source}</span>
+                <span className="text-sm text-muted-foreground capitalize">{item.source}</span>
                 <span className="text-sm font-semibold text-card-foreground">${item.amount.toLocaleString()}</span>
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-secondary/50">

@@ -10,10 +10,6 @@ export function CompactExpensesSection() {
   const { accounts } = useAccounts()
 
   // Calculate metrics
-  const totalDebt = accounts
-    .filter((acc: any) => acc.type === 'loan' || (acc.type === 'Credit Card' && acc.balance < 0))
-    .reduce((sum: number, acc: any) => sum + Math.abs(acc.balance < 0 ? acc.balance : acc.balance), 0)
-
   const monthlyExpenses = transactions
     .filter((txn: any) => txn.positive === false)
     .reduce((sum: number, txn: any) => sum + Math.abs(txn.amount), 0)
@@ -81,11 +77,7 @@ export function CompactExpensesSection() {
       </CardHeader>
       <CardContent className="space-y-2 px-3 pb-2">
         {/* Key Metrics */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-lg bg-red-50 dark:bg-red-950/20 p-3 border border-red-200 dark:border-red-800">
-            <p className="text-xs font-medium text-muted-foreground mb-1">Total Debt</p>
-            <p className="text-base font-bold text-red-600 dark:text-red-400">${totalDebt.toLocaleString()}</p>
-          </div>
+        <div className="grid grid-cols-1 gap-3">
           <div className="rounded-lg bg-red-50 dark:bg-red-950/20 p-3 border border-red-200 dark:border-red-800">
             <p className="text-xs font-medium text-muted-foreground mb-1">Monthly Expenses</p>
             <p className="text-base font-bold text-red-600 dark:text-red-400">${monthlyExpenses.toLocaleString()}</p>
@@ -124,7 +116,7 @@ export function CompactExpensesSection() {
           {expenseSources.map((item) => (
             <div key={item.source} className="space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">{item.source}</span>
+                <span className="text-sm text-muted-foreground capitalize">{item.source}</span>
                 <span className="text-sm font-semibold text-card-foreground">${item.amount.toLocaleString()}</span>
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-secondary/50">

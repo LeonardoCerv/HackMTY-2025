@@ -15,6 +15,7 @@ interface Transaction {
   positive: boolean
   transaction_date: string
   description: string
+  type: string
 }
 
 interface TransactionsTableProps {
@@ -29,7 +30,8 @@ function mapNessieTransaction(tx: any): Transaction {
     amount: typeof tx.amount === 'number' ? tx.amount : Number(tx.amount ?? 0),
     positive: typeof tx.positive === 'boolean' ? tx.positive : (tx.positive === 'true' || (tx.amount && Number(tx.amount) >= 0)),
     transaction_date: tx.transaction_date ?? tx.date ?? new Date().toISOString(),
-    description: tx.description ?? tx.memo ?? '—'
+    description: tx.description ?? tx.memo ?? '—',
+    type: tx.type ?? 'unknown'
   }
 }
 
@@ -160,6 +162,7 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
                 <th className="text-left py-2 px-2 font-medium text-card-foreground w-20">Date</th>
                 <th className="text-left py-2 px-2 font-medium text-card-foreground w-40">Account</th>
                 <th className="text-left py-2 px-2 font-medium text-card-foreground w-40">Amount</th>
+                <th className="text-left py-2 px-2 font-medium text-card-foreground w-24">Type</th>
                 <th className="text-left py-2 px-2 font-medium text-card-foreground min-w-0">Description</th>
               </tr>
             </thead>
@@ -176,7 +179,9 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
                     {tx.positive ? '+' : '-'}{formatCurrency(tx.amount)}
                   </td>
 
-                  <td className="py-1 px-2 text-muted-foreground truncate">[{tx.nickname}] {tx.description || '—'}</td>
+                  <td className="py-1 px-2 text-white capitalize">{tx.type}</td>
+
+                  <td className="py-1 px-2 text-muted-foreground truncate">{tx.description || '—'}</td>
                 </tr>
               ))}
             </tbody>

@@ -21,7 +21,7 @@ export interface Transaction {
   category: string 
   subcategory: string
   date: string
-  type: 'credit' | 'debit'
+  type: 'deposit' | 'withdrawal' | 'purchase' | 'transfer' | 'loan' | 'credit' | 'debit'
   merchant: string
   isRecurring: boolean
 }
