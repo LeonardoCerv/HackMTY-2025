@@ -37,6 +37,7 @@ Create a top-level `.env` for backend/agent and `frontend/.env.local` (if you wa
 - GOOGLE_AI_API_KEY=your_gemini_api_key_here   # optional (Agent)
 - NESSIE_API_KEY=your_nessie_key_here           # optional (Backend live mode)
 - USE_MOCK=true                                 # true = use bundled JSON, false = use Nessie/live
+- MOCK_USER_TYPE                               # medium = type of user that we want to simulate (bad, medium, good)
 - BACKEND_URL=http://127.0.0.1:8000             # frontend -> backend proxy (optional override)
 - AGENT_URL=http://127.0.0.1:8001               # frontend -> agent proxy (optional override)
 
