@@ -160,3 +160,24 @@ def get_accounts() -> List[Dict[str, Any]]:
             status_code=503,
             detail="Error de conexión con la API externa."
         )
+
+@router.get("/api/v1/loans")   
+def get_loans() -> List[Dict[str, Any]]:
+    """Obtiene todos los préstamos de Nessie."""
+    nessie_url = f"{NESSIE_BASE_URL}/loans?key={NESSIE_API_KEY}"
+    
+    try:
+        response = requests.get(nessie_url)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.HTTPError as err:
+        status_code = err.response.status_code
+        raise HTTPException(
+            status_code=status_code,
+            detail="Error al obtener los préstamos de Nessie."
+        )
+    except requests.exceptions.RequestException:
+        raise HTTPException(
+            status_code=503,
+            detail="Error de conexión con la API externa."
+        )

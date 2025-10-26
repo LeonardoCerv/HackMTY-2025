@@ -1,42 +1,38 @@
-const PYTHON_API_BASE_URL = "http://localhost:8000";
+import { NextRequest, NextResponse } from "next/server";
 
-interface NessieAccount {
-  _id: string;
-  type: string;
-  balance: number;
-}
-
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const urlCompleta = `${PYTHON_API_BASE_URL}/api/v1/accounts`;
+    const res = await fetch(`http://127.0.0.1:8000/api/accounts`);
+    
+    const text = await res.text();
+    console.log("FastAPI Response Status:", res.status);
+    console.log("FastAPI Response Text:", text.substring(0, 200));
 
-    const response = await fetch(urlCompleta);
+    if (!res.ok) {
+      console.error("FastAPI returned error:", text);
+      return NextResponse.json(
+        { error: "Error from FastAPI", details: text }, 
+        { status: res.status }
+      );
+    }     
 
-    const data: NessieAccount[] | { code: number, message: string } = await response.json();
-    console.log("DATA: " , data, " ")
-
-    return new Response(JSON.stringify(data), {
-      status: response.status,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    try { 
+      const data = JSON.parse(text);
+      return NextResponse.json(data);
+    } catch (parseError) {
+      console.error("Failed to parse JSON:", parseError);
+      console.error("Response was:", text);
+      return NextResponse.json(
+        { error: "Invalid JSON response from FastAPI", response: text }, 
+        { status: 500 }
+      );
+    }
 
   } catch (error) {
-
-    console.error("No se pudo conectar con el Backend de Python (verificar si está corriendo en 8000):", error);
-
-    return new Response(
-      JSON.stringify({ 
-        code: 503, 
-        message: "El servidor de Python para el análisis financiero no está disponible." 
-      }), 
-      {
-        status: 503, 
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
+    console.error("Error desde FastAPI:", error);
+    return NextResponse.json(
+      { error: "No se pudo obtener las cuentas", details: String(error) }, 
+      { status: 500 }
     );
   }
 }
