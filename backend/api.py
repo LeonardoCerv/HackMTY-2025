@@ -141,7 +141,7 @@ def get_transactions_for_customer():
 
 
 @router.get("/api/v1/accounts")
-def get_accounts() -> List[Dict[str, Any]]:
+def get_accounts() -> Dict[str, Any]:
     """Obtiene todas las cuentas de Nessie."""
     nessie_url = f"{NESSIE_BASE_URL}/accounts?key={NESSIE_API_KEY}"
     
@@ -161,23 +161,47 @@ def get_accounts() -> List[Dict[str, Any]]:
             detail="Error de conexión con la API externa."
         )
 
-@router.get("/api/v1/loans")   
-def get_loans() -> List[Dict[str, Any]]:
+@router.get("/api/loans")   
+def get_loans() ->  Dict[str, Any]:
     """Obtiene todos los préstamos de Nessie."""
-    nessie_url = f"{NESSIE_BASE_URL}/loans?key={NESSIE_API_KEY}"
+
+    customers_url = f"{NESSIE_BASE_URL}/customers?key={NESSIE_API_KEY}"
+    customers = fetch_from_nessie(customers_url)
+
+    if not customers:
+        raise HTTPException(status_code=404, detail="No se encontraron clientes en Nessie.")
+
+    customer = customers[0]
+    customer_id = customer["_id"]
+    customer_name = f"{customer.get('first_name', '')} {customer.get('last_name', '')}".strip()
+
+    print(f"Cliente seleccionado: {customer_name} (ID: {customer_id})")
+    accounts_url = f"{NESSIE_BASE_URL}/customers/{customer_id}/accounts?key={NESSIE_API_KEY}"
+    accounts = fetch_from_nessie(accounts_url)
+
+    if not accounts:
+        raise HTTPException(status_code=404, detail="No se encontraron cuentas en Nessie.")
+
+    account = accounts[0]
+    account_id = account["_id"]
+    account_type = account.get("account_type", "N/A")
+    nickname = account.get("nickname", "N/A")
+
+    print(f"Cuenta seleccionada: {nickname} (ID: {account_id}, Tipo: {account_type})")
+
+    nessie_url = f"{NESSIE_BASE_URL}/accounts/{account_id}/loans?key={NESSIE_API_KEY}"
     
-    try:
-        response = requests.get(nessie_url)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.HTTPError as err:
-        status_code = err.response.status_code
-        raise HTTPException(
-            status_code=status_code,
-            detail="Error al obtener los préstamos de Nessie."
-        )
-    except requests.exceptions.RequestException:
-        raise HTTPException(
-            status_code=503,
-            detail="Error de conexión con la API externa."
-        )
+    loans = fetch_from_nessie(nessie_url)
+
+    if not loans:
+        raise HTTPException(status_code=404, detail="No se encontraron préstamos en Nessie.")   
+    
+    loan = loans[-1]
+    credit_score = loan.get("credit_score", "N/A")
+    print(f"Préstamo seleccionado: ID {loan['_id']} con puntaje crediticio {credit_score}") 
+
+    return {
+        "loans": loans,
+        "credit_score": credit_score,
+        "total_loans": len(loans)
+    }
