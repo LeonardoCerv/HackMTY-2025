@@ -116,7 +116,8 @@ def call_gemini_analysis(prompt: str) -> AgentAnalysisResponse:
         else:
             raise RuntimeError(f"Failed to parse LLM JSON: {e}: {text[:200]}")
 
-        # Handle the chart field - it can be null or a chart object
+    # Handle the chart field - it can be null or a chart object
+    try:
         if data.get("chart") and isinstance(data["chart"], dict):
             # Create a Graph object from the chart data
             from models import Graph

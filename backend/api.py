@@ -89,8 +89,6 @@ def get_transactions_for_customer():
     # 6️⃣ Ordenar por fecha descendente (manejar None values correctamente)
     all_tx.sort(key=lambda x: x.get("transaction_date") or "", reverse=True)
 
-    print(f"Total de transacciones obtenidas: {all_tx}")
-
     # 7️⃣ Respuesta final
     return {
         "customer": {

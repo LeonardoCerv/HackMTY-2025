@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
   try {
-    const { question } = await request.json()
+    const { question, transactions } = await request.json()
 
     if (!question) {
       return NextResponse.json({
@@ -12,19 +12,22 @@ export async function POST(request: Request) {
     }
 
     // Call the backend agent for comprehensive analysis
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000'
+    const backendUrl = process.env.AGENT_URL || 'http://localhost:8001'
     const response = await fetch(`${backendUrl}/api/generate-analysis`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        request: question
+        request: question,
+        transactions: transactions // Pass the transaction data to avoid duplicate API calls
       }),
     })
 
     if (!response.ok) {
-      throw new Error(`Backend API error: ${response.status}`)
+      const errorText = await response.text()
+      console.error('Agent error response:', errorText)
+      throw new Error(`Backend API error: ${response.status} - ${errorText}`)
     }
 
     const analysisResult = await response.json()

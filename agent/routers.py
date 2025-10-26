@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from typing import Dict, Any
 from models import AgentAnalysisResponse
 from generate_new_graph import generate_financial_analysis
+import requests
 
 # Create router instances
 agent_router = APIRouter(prefix="/api", tags=["Agent"])
@@ -22,63 +23,19 @@ async def generate_financial_analysis_endpoint(request: Dict[str, Any]) -> Agent
         raise HTTPException(status_code=400, detail="Missing 'request' in body")
 
     # Fetch transaction data for analysis
-    account_id = request.get("account_id", "user123")  # Allow account_id in request
-    transaction_data = []
-    try:
-        # Generate dummy transaction data (same logic as /transactions endpoint)
-        import random
-        from datetime import datetime, timedelta
-
-        categories = ["Food & Dining", "Transportation", "Shopping", "Entertainment", "Bills & Utilities", "Healthcare", "Travel"]
-        merchants = {
-            "Food & Dining": ["Starbucks", "McDonald's", "Chipotle", "Whole Foods", "Trader Joe's"],
-            "Transportation": ["Uber", "Lyft", "Shell", "Chevron", "Metro"],
-            "Shopping": ["Amazon", "Target", "Walmart", "Best Buy", "Nike"],
-            "Entertainment": ["Netflix", "Spotify", "AMC", "Steam", "Disney+"],
-            "Bills & Utilities": ["PG&E", "Comcast", "AT&T", "Water Company", "Internet Provider"],
-            "Healthcare": ["CVS", "Walgreens", "Doctor's Office", "Pharmacy", "Hospital"],
-            "Travel": ["Airbnb", "Hotel", "Delta", "United", "Expedia"]
-        }
-
-        base_date = datetime.now() - timedelta(days=180)
-        for i in range(200):
-            days_ago = random.randint(0, 180)
-            transaction_date = base_date + timedelta(days=days_ago)
-
-            category = random.choice(categories)
-            merchant = random.choice(merchants[category])
-
-            amount_ranges = {
-                "Food & Dining": (5, 85),
-                "Transportation": (2, 120),
-                "Shopping": (10, 500),
-                "Entertainment": (5, 25),
-                "Bills & Utilities": (20, 200),
-                "Healthcare": (10, 300),
-                "Travel": (50, 1000)
-            }
-
-            min_amount, max_amount = amount_ranges[category]
-            amount = round(random.uniform(min_amount, max_amount), 2)
-
-            transaction = {
-                "id": f"hist_{i}",
-                "account_id": account_id,
-                "amount": -amount,
-                "merchant": merchant,
-                "category": category,
-                "date": transaction_date.isoformat(),
-                "description": f"{merchant} - {category}",
-                "type": "debit"
-            }
-            transaction_data.append(transaction)
-
-        # Sort by date (most recent first)
-        transaction_data.sort(key=lambda x: x.get("date", ""), reverse=True)
-
-    except Exception as e:
-        print(f"Warning: Could not generate transaction data: {e}")
-        transaction_data = []
+    transaction_data = request.get("transactions", [])  # Use provided data if available
+    
+    # If no transaction data provided, fetch from backend
+    if not transaction_data:
+        try:
+            # Fetch REAL transaction data from backend
+            backend_response = requests.get("http://127.0.0.1:8000/api/transactions", timeout=10)
+            backend_response.raise_for_status()
+            backend_data = backend_response.json()
+            transaction_data = backend_data.get("transactions", [])
+        except Exception as e:
+            print(f"Warning: Could not fetch real transaction data: {e}")
+            transaction_data = []  # Fallback to empty if backend unavailable
 
     # Call Google Gemini to obtain comprehensive analysis
     try:
