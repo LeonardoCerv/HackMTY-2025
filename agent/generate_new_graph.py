@@ -12,7 +12,7 @@ except ImportError:  # pragma: no cover
 
 
 ANALYSIS_PROMPT_PREAMBLE = (
-    "You are a sophisticated Financial Analysis Agent. Based on the user's query, provide a comprehensive response that may include a chart, detailed analysis, and justification."
+    "You are a sophisticated Financial Analysis Agent. Based on the user's query and their personal transaction history, provide a highly personalized response that feels tailored specifically to their financial situation."
 )
 
 ANALYSIS_SCHEMA_INSTRUCTIONS = (
@@ -48,15 +48,22 @@ Supported Chart Types:
 - "scatter": For showing relationships between two variables
 
 Analysis Requirements:
-- Provide detailed, actionable financial insights
-- Include specific numbers and trends from the data
-- Give practical recommendations
-- Keep analysis under 400 words
+- Write directly to the user as if in a personal conversation - no meta-references or treating this as a conversation
+- Do not reference the user by name or include any conversational elements
+- Provide clear, simple, and concise financial insights that anyone can understand
+- Use PLAIN TEXT ONLY - NO markdown, NO asterisks (*), NO special formatting characters
+- NO bullet points with asterisks, NO bold/italic markers, NO formatting symbols
+- Use proper paragraphs and line breaks for readability and visual separation
+- Include specific numbers and key trends from the data
+- Give practical, actionable recommendations
+- Keep analysis under 150 words - be direct and focus on the most important insights only
+- Make it easy to read with natural spacing
+- Tailor all insights to the user's specific transaction history and spending patterns - reference their actual data
+- Make recommendations based on their personal financial behavior, not generic advice
 
 Justification Requirements:
-- Explain why you chose this specific chart type
-- Include reasoning based on data patterns
-- Explain business value of the chosen visualization
+- Keep it very brief: 1-2 simple sentences explaining why this chart type was chosen
+- Focus on the main reason only, no technical details
 
 Set chart to null if no visualization adds value to the analysis.
 """
@@ -70,11 +77,27 @@ def _build_analysis_prompt(user_request: str, transaction_data: List[Dict[str, A
     return (
         f"{ANALYSIS_PROMPT_PREAMBLE}\n\n"
         f"User request: {user_request}\n\n"
-        f"Transaction data sample (first 10 transactions):\n{sample_data}\n\n"
+        f"Your transaction data sample (first 10 transactions - use this to understand their spending patterns):\n{sample_data}\n\n"
         f"Total transactions available: {len(transaction_data) if transaction_data else 0}\n\n"
+        f"Analyze their specific financial behavior and provide personalized insights based on their actual transaction history.\n\n"
         f"{ANALYSIS_SCHEMA_INSTRUCTIONS}\n\n"
-        "Return ONLY the JSON object with chart, analysis, and justification keys."
+        "CRITICAL: Return responses in PLAIN TEXT ONLY. Absolutely NO asterisks (*), NO markdown, NO special formatting characters. Use line breaks and paragraphs for separation. Analysis should be simple and clear, justifications can be more technical but keep the overall justification very brief (1-2 sentences). Chart justifications should be very short as specified."
     )
+
+def extract_json(text: str) -> Optional[str]:
+    """Extract the first complete JSON object from text."""
+    start = text.find('{')
+    if start == -1:
+        return None
+    brace_count = 0
+    for i in range(start, len(text)):
+        if text[i] == '{':
+            brace_count += 1
+        elif text[i] == '}':
+            brace_count -= 1
+            if brace_count == 0:
+                return text[start:i+1]
+    return None
 
 def call_gemini_analysis(prompt: str) -> AgentAnalysisResponse:
     api_key = os.getenv("GOOGLE_API_KEY")
@@ -87,7 +110,7 @@ def call_gemini_analysis(prompt: str) -> AgentAnalysisResponse:
         )
 
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-2.0-flash-exp')
+    model = genai.GenerativeModel('gemini-2.5-flash')
     response = model.generate_content(prompt)
 
     if not response.text:
@@ -95,26 +118,36 @@ def call_gemini_analysis(prompt: str) -> AgentAnalysisResponse:
 
     # Try to parse JSON
     text = response.text.strip()
+    
+    # First try direct parsing
     try:
         data = json.loads(text)
-    except json.JSONDecodeError as e:
-        # Sometimes models wrap in code-fences; try to strip them
-        if text.startswith("```"):
-            stripped = text
-            # Remove optional language tag
-            if stripped.startswith("```json"):
-                stripped = stripped[len("```json"):]
-            else:
-                stripped = stripped[len("```"):]
-            if stripped.endswith("```"):
-                stripped = stripped[:-3]
-            text_stripped = stripped.strip()
+    except json.JSONDecodeError:
+        # Try to extract JSON object from text
+        json_str = extract_json(text)
+        if json_str:
             try:
-                data = json.loads(text_stripped)
-            except Exception:
-                raise RuntimeError(f"Failed to parse LLM JSON: {e}: {text[:200]}")
+                data = json.loads(json_str)
+            except json.JSONDecodeError as e:
+                raise RuntimeError(f"Failed to parse extracted JSON: {e}: {json_str[:200]}")
         else:
-            raise RuntimeError(f"Failed to parse LLM JSON: {e}: {text[:200]}")
+            # Fallback: try to strip code fences
+            if text.startswith("```"):
+                stripped = text
+                # Remove optional language tag
+                if stripped.startswith("```json"):
+                    stripped = stripped[len("```json"):]
+                else:
+                    stripped = stripped[len("```"):]
+                if stripped.endswith("```"):
+                    stripped = stripped[:-3]
+                text_stripped = stripped.strip()
+                try:
+                    data = json.loads(text_stripped)
+                except Exception:
+                    raise RuntimeError(f"Failed to parse LLM JSON after stripping fences: {e}: {text[:200]}")
+            else:
+                raise RuntimeError(f"Failed to parse LLM JSON: {e}: {text[:200]}")
 
     # Handle the chart field - it can be null or a chart object
     try:

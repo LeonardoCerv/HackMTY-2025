@@ -27,6 +27,7 @@ interface AgentResponse {
   justification: string
   chart?: ChartData
   success: boolean
+  userQuery?: string
 }
 
 interface AgentResponseModalProps {
@@ -51,68 +52,115 @@ export function AgentResponseModal({ open, onOpenChange, response }: AgentRespon
         </DialogHeader>
 
         <div className="space-y-6 p-6">
-          {/* Chart Section */}
-          {response.chart && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-lg font-semibold">
-                <BarChart3 className="h-5 w-5 text-primary" />
-                <span>{response.chart.title}</span>
+          {/* User Query Section */}
+          {response.userQuery && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-base font-semibold">
+                <span>User Query</span>
               </div>
-              
-              <div className="rounded-lg border border-border bg-card p-4">
-                <AgentChart
-                  type={response.chart.type}
-                  title={response.chart.title}
-                  data={response.chart.data}
-                />
+              <div className="rounded-lg border border-border bg-secondary/30 p-4">
+                <div className="text-sm text-card-foreground leading-relaxed whitespace-pre-wrap">
+                  {response.userQuery}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {response.chart ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Chart Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-base font-semibold">
+                  <BarChart3 className="h-8 w-8 text-white bg-primary p-1 rounded-md" />
+                  <span className="text-white">{response.chart.title}</span>
+                </div>
+                
+                <div className="rounded-lg border border-border bg-card p-4">
+                  <AgentChart
+                    type={response.chart.type}
+                    title={response.chart.title}
+                    data={response.chart.data}
+                  />
+
+                  {/* Chart Justification inside the card */}
+                  {response.chart.justification && (
+                    <div className="mt-4 rounded-lg border border-border/50 bg-muted/20 p-3">
+                      <div className="flex items-start gap-2">
+                        <Info className="h-4 w-4 text-white flex-shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                          <div className="text-xs font-medium text-white mb-1">
+                            Why This Chart?
+                          </div>
+                          <div className="text-xs text-muted-foreground/80 leading-relaxed">
+                            {response.chart.justification}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Chart Justification */}
-              {response.chart.justification && (
-                <div className="rounded-lg border border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-950/20 p-4">
-                  <div className="flex items-start gap-3">
-                    <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-card-foreground mb-2">
-                        Why This Chart?
+              {/* Analysis Section with justification below */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-base font-semibold">
+                  <Lightbulb className="h-8 w-8 text-white bg-primary p-1 rounded-md" />
+                  <span>Detailed Analysis</span>
+                </div>
+                
+                <div className="rounded-lg border border-border bg-secondary/30 p-4">
+                  <div className="text-sm text-card-foreground leading-relaxed whitespace-pre-wrap">
+                    {response.analysis}
+                  </div>
+                </div>
+
+                {/* Justification below analysis */}
+                {response.justification && (
+                  <div className="rounded-lg border border-border/50 bg-muted/20 p-3">
+                    <div className="flex items-start gap-2">
+                      <Info className="h-4 w-4 text-white flex-shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <div className="text-xs font-medium text-white mb-1">
+                          justification
+                        </div>
+                        <div className="text-xs text-muted-foreground/80 leading-relaxed whitespace-pre-wrap">
+                          {response.justification}
+                        </div>
                       </div>
-                      <div className="text-sm text-muted-foreground leading-relaxed">
-                        {response.chart.justification}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-base font-semibold">
+                <Lightbulb className="h-8 w-8 text-white bg-primary p-1 rounded-md" />
+                <span>Detailed Analysis</span>
+              </div>
+              
+              <div className="rounded-lg border border-border bg-secondary/30 p-4">
+                <div className="text-sm text-card-foreground leading-relaxed whitespace-pre-wrap">
+                  {response.analysis}
+                </div>
+              </div>
+
+              {/* Justification below analysis */}
+              {response.justification && (
+                <div className="rounded-lg border border-border/50 bg-muted/20 p-3">
+                  <div className="flex items-start gap-2">
+                    <Info className="h-4 w-4 text-white flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <div className="text-xs font-medium text-white mb-1">
+                        justification
+                      </div>
+                      <div className="text-xs text-muted-foreground/80 leading-relaxed whitespace-pre-wrap">
+                        {response.justification}
                       </div>
                     </div>
                   </div>
                 </div>
               )}
-            </div>
-          )}
-
-          {/* Analysis Section */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-lg font-semibold">
-              <Lightbulb className="h-5 w-5 text-amber-600" />
-              <span>Detailed Analysis</span>
-            </div>
-            
-            <div className="rounded-lg border border-border bg-secondary/30 p-4">
-              <div className="text-sm text-card-foreground leading-relaxed whitespace-pre-wrap">
-                {response.analysis}
-              </div>
-            </div>
-          </div>
-
-          {/* Justification Section */}
-          {response.justification && (
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 text-lg font-semibold">
-                <Info className="h-5 w-5 text-green-600" />
-                <span>Analysis Methodology</span>
-              </div>
-              
-              <div className="rounded-lg border border-green-200 bg-green-50/50 dark:border-green-800 dark:bg-green-950/20 p-4">
-                <div className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                  {response.justification}
-                </div>
-              </div>
             </div>
           )}
 
