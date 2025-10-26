@@ -1,0 +1,30 @@
+{
+  "customer_name": "María Elena Rodríguez",
+  "loans": {
+    "total_loans": 1,
+    "total_loan_amount": 255000.00,
+    "total_monthly_payments": 8500.00,
+    "active_loans": 1,
+    "loans_detail": [
+      {
+        "_id": "loan_001",
+        "type": "Home Loan",
+        "status": "pending",
+        "amount": 255000.00,
+        "monthly_payment": 8500.00,
+        "term": 36,
+        "rate": 5.2,
+        "credit_score": 735,
+        "account_id": "acc_loan_001",
+        "customer_id": "c1a2b3c4d5e6f7g8h9i0",
+        "origination_date": "2023-08-15",
+        "due_date": "2026-08-15"
+      }
+    ]
+  },
+  "credit_score": {
+    "score": 735,
+    "range": "Good",
+    "last_updated": "2025-10-25T10:00:00Z"
+  }
+}

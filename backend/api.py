@@ -16,6 +16,19 @@ NESSIE_BASE_URL = "http://api.nessieisreal.com"
 
 use_mock = os.getenv("use_mock", "false").lower() == "true"
 
+def load_mock_json(folder_name: str, file_name: str) -> Dict[str, Any]:
+    """Carga datos desde un archivo JSON local, usado cuando use_mock=True"""
+    try:
+        json_file_path = Path(__file__).parent / folder_name / file_name
+        if not json_file_path.exists():
+            raise HTTPException(status_code=404, detail=f"Archivo no encontrado: {json_file_path}")
+
+        with open(json_file_path, "r", encoding="utf-8") as file:
+            return json.load(file)
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=500, detail=f"Error en formato JSON: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al cargar JSON: {str(e)}")
 
 def fetch_from_nessie(url: str) -> List[Dict[str, Any]]:
     """Hace una petición GET segura a la API de Nessie y devuelve lista."""
@@ -35,40 +48,7 @@ def get_transactions_for_customer():
     Obtiene todas las transacciones del primer cliente disponible.
     """
     if use_mock:
-        try:
-            # Ruta ajustada para tu estructura
-            # Path(__file__).parent es la raíz (C:.)
-            json_file_path = Path(__file__).parent / "data-transactions" / "good_transactions.json"
-            
-            # Verificar que el archivo existe
-            if not json_file_path.exists():
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"Archivo no encontrado en: {json_file_path}"
-                )
-            
-            with open(json_file_path, 'r', encoding='utf-8') as file:
-                data = json.load(file)
-            
-            print(f"✅ Datos cargados desde JSON local: {data['customer']['name']}")
-            print(f"📊 Total de transacciones: {data['total_transactions']}")
-            return data
-            
-        except FileNotFoundError:
-            raise HTTPException(
-                status_code=404,
-                detail="Archivo transactions.json no encontrado en 'data-transactions/'"
-            )
-        except json.JSONDecodeError as e:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Error en el formato del archivo JSON: {str(e)}"
-            )
-        except Exception as e:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Error inesperado: {str(e)}"
-            )
+        return load_mock_json("data-transactions", "good_transactions.json")
     
     else:
         # Tu código original con la API de Nessie
@@ -141,30 +121,35 @@ def get_transactions_for_customer():
         }
 
 
-@router.get("/api/v1/accounts")
-def get_accounts() -> Dict[str, Any]:
-    """Obtiene todas las cuentas de Nessie."""
-    nessie_url = f"{NESSIE_BASE_URL}/accounts?key={NESSIE_API_KEY}"
+# @router.get("/api/v1/accounts")
+# def get_accounts() -> Dict[str, Any]:
+#     """Obtiene todas las cuentas de Nessie."""
+#     if use_mock:
+#         return load_mock_json("data-transactions", "good_transactions.json")
+
+#     nessie_url = f"{NESSIE_BASE_URL}/accounts?key={NESSIE_API_KEY}"
     
-    try:
-        response = requests.get(nessie_url)
-        response.raise_for_status()
-        return response.json()
-    except requests.exceptions.HTTPError as err:
-        status_code = err.response.status_code
-        raise HTTPException(
-            status_code=status_code,
-            detail="Error al obtener las cuentas de Nessie."
-        )
-    except requests.exceptions.RequestException:
-        raise HTTPException(
-            status_code=503,
-            detail="Error de conexión con la API externa."
-        )
+#     try:
+#         response = requests.get(nessie_url)
+#         response.raise_for_status()
+#         return response.json()
+#     except requests.exceptions.HTTPError as err:
+#         status_code = err.response.status_code
+#         raise HTTPException(
+#             status_code=status_code,
+#             detail="Error al obtener las cuentas de Nessie."
+#         )
+#     except requests.exceptions.RequestException:
+#         raise HTTPException(
+#             status_code=503,
+#             detail="Error de conexión con la API externa."
+#         )
 
 @router.get("/api/loans")   
 def get_loans() -> Dict[str, Any]:
     """Obtiene todos los préstamos con información detallada."""
+    if use_mock:
+        return load_mock_json("data-loans", "good_loans.json")  
 
     customers_url = f"{NESSIE_BASE_URL}/customers?key={NESSIE_API_KEY}"
     customers = fetch_from_nessie(customers_url)
@@ -217,6 +202,8 @@ def get_loans() -> Dict[str, Any]:
 @router.get("/api/credit-score")
 def get_credit_score() -> Dict[str, Any]:
     """Obtiene el puntaje crediticio con información detallada."""
+    if use_mock:
+        return load_mock_json("data-credit", "good-credit.json")
     
     customers_url = f"{NESSIE_BASE_URL}/customers?key={NESSIE_API_KEY}"
     customers = fetch_from_nessie(customers_url)
@@ -268,6 +255,8 @@ def get_credit_score() -> Dict[str, Any]:
 @router.get("/api/loans-credit-summary")
 def get_loans_credit_summary() -> Dict[str, Any]:
     """Obtiene un resumen completo de préstamos y credit score."""
+    if use_mock:
+        return load_mock_json("data-summary", "good_summary.json")
     
     customers_url = f"{NESSIE_BASE_URL}/customers?key={NESSIE_API_KEY}"
     customers = fetch_from_nessie(customers_url)
