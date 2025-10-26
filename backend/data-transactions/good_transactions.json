@@ -618,12 +618,30 @@
       "positive": true,
       "transaction_date": "2025-01-02",
       "description": "Depósito bono anual + nómina"
-    }
-  ]
-}amount": 5000.00,
+    },
+    {
+      "customer_id": "c1a2b3c4d5e6f7g8h9i0",
+      "customer_name": "María Elena Rodríguez",
+      "account_id": "acc_loan_001",
+      "account_type": "Loan",
+      "nickname": "Préstamo Hipotecario",
+      "type": "loan",
+      "amount": 8500.00,
+      "positive": true,
+      "transaction_date": "2025-08-25",
+      "description": "Pago mensual de hipoteca - Agosto"
+    },
+    {
+      "customer_id": "c1a2b3c4d5e6f7g8h9i0",
+      "customer_name": "María Elena Rodríguez",
+      "account_id": "acc_cc_001",
+      "account_type": "Credit Card",
+      "nickname": "Capital One Quicksilver",
+      "type": "purchase",
+      "amount": 760.00,
       "positive": false,
-      "transaction_date": "2025-08-10",
-      "description": "Transferencia a inversión CETES"
+      "transaction_date": "2025-08-28",
+      "description": "Farmacias Guadalajara"
     },
     {
       "customer_id": "c1a2b3c4d5e6f7g8h9i0",
@@ -1040,4 +1058,58 @@
       "account_type": "Savings",
       "nickname": "Cuenta de Ahorros Principal",
       "type": "transfer",
-      "
+      "amount": 500.00,
+      "positive": false,
+      "transaction_date": "2025-04-10",
+      "description": "Transferencia a cuenta de ahorros secundaria"
+    },
+    {
+      "customer_id": "c1a2b3c4d5e6f7g8h9i0",
+      "customer_name": "María Elena Rodríguez", 
+      "account_id": "acc_cc_001",
+      "account_type": "Credit Card",
+      "nickname": "Capital One Quicksilver",
+      "type": "purchase",
+      "amount": 1430.00,
+      "positive": false,
+      "transaction_date": "2025-04-08",
+      "description": "Liverpool - Compras"
+    },
+    {
+      "customer_id": "c1a2b3c4d5e6f7g8h9i0",
+      "customer_name": "María Elena Rodríguez",
+      "account_id": "acc_sav_001",
+      "account_type": "Savings",
+      "nickname": "Cuenta de Ahorros Principal",
+      "type": "withdrawal",
+      "amount": 1800.00,
+      "positive": false,
+      "transaction_date": "2025-04-05",
+      "description": "Retiro para gastos médicos"
+    },  
+    {
+      "customer_id": "c1a2b3c4d5e6f7g8h9i0",
+      "customer_name": "María Elena Rodríguez",
+      "account_id": "acc_sav_001",
+      "account_type": "Savings",
+      "nickname": "Cuenta de Ahorros Principal",
+      "type": "deposit",
+      "amount": 12000.00,
+      "positive": true,
+      "transaction_date": "2025-04-01",
+      "description": "Depósito nómina quincenal"
+    },
+    {
+      "customer_id": "c1a2b3c4d5e6f7g8h9i0",
+      "customer_name": "María Elena Rodríguez",
+      "account_id": "acc_loan_001",
+      "account_type": "Loan",
+      "nickname": "Préstamo Hipotecario",
+      "type": "loan",
+      "amount": 8500.00,
+      "positive": true,
+      "transaction_date": "2025-03-25",
+      "description": "Pago mensual de hipoteca - Marzo"
+    }
+  ]
+}

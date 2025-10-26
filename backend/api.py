@@ -17,18 +17,28 @@ NESSIE_BASE_URL = "http://api.nessieisreal.com"
 use_mock = os.getenv("use_mock", "false").lower() == "true"
 
 def load_mock_json(folder_name: str, file_name: str) -> Dict[str, Any]:
-    """Carga datos desde un archivo JSON local, usado cuando use_mock=True"""
+    """Carga datos desde un archivo JSON local, con búsqueda flexible según estructura del proyecto."""
     try:
-        json_file_path = Path(__file__).parent / folder_name / file_name
+        base_path = Path(__file__).parent  # ruta actual
+        json_file_path = base_path / folder_name / file_name
+
+        # Si no lo encuentra en la misma carpeta, sube un nivel
         if not json_file_path.exists():
-            raise HTTPException(status_code=404, detail=f"Archivo no encontrado: {json_file_path}")
+            json_file_path = base_path.parent / folder_name / file_name
+
+        if not json_file_path.exists():
+            raise HTTPException(status_code=404, detail=f"Archivo no encontrado: {json_file_path.resolve()}")
+
+        print(f"🧩 Cargando mock desde: {json_file_path.resolve()}")
 
         with open(json_file_path, "r", encoding="utf-8") as file:
             return json.load(file)
+
     except json.JSONDecodeError as e:
         raise HTTPException(status_code=500, detail=f"Error en formato JSON: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error al cargar JSON: {str(e)}")
+
 
 def fetch_from_nessie(url: str) -> List[Dict[str, Any]]:
     """Hace una petición GET segura a la API de Nessie y devuelve lista."""
