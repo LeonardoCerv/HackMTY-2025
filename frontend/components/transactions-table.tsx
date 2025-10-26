@@ -133,27 +133,27 @@ export function TransactionsTable({ className }: TransactionsTableProps) {
           <table className="w-full text-xs">
             <thead className="sticky top-0 bg-background text-xs">
               <tr className="border-b">
-                <th className="text-left py-2 px-2 font-medium text-card-foreground w-20">Date</th>
-                <th className="text-left py-2 px-2 font-medium text-card-foreground w-40">Account</th>
-                <th className="text-left py-2 px-2 font-medium text-card-foreground w-40">Amount</th>
+                <th className="text-left py-2 px-2 font-medium text-card-foreground w-32">Date</th>
+                <th className="text-left py-2 px-2 font-medium text-card-foreground w-48">Account</th>
+                <th className="text-left py-2 px-2 font-medium text-card-foreground w-44">Amount</th>
                 <th className="text-left py-2 px-2 font-medium text-card-foreground w-24">Type</th>
-                <th className="text-left py-2 px-2 font-medium text-card-foreground min-w-0">Description</th>
+                <th className="text-left py-2 px-2 font-medium text-card-foreground w-24">Description</th>
               </tr>
             </thead>
             <tbody>
               {currentTransactions.map((tx, i) => (
                 <tr key={i} className="border-b hover:bg-muted/50">
-                  <td className="py-1 px-2 text-muted-foreground">{formatDate(tx.transaction_date)}</td>
+                  <td className="py-1 px-2 text-muted-foreground whitespace-nowrap">{formatDate(tx.transaction_date)}</td>
 
-                  <td className="py-1 px-2 text-card-foreground">
+                  <td className="py-1 px-2 text-card-foreground whitespace-nowrap">
                     {tx.account_type}
                   </td>
 
-                  <td className={`py-1 px-2 font-medium ${tx.positive ? 'text-primary' : 'text-accent'}`}>
+                  <td className={`py-1 px-2 font-medium whitespace-nowrap ${tx.positive ? 'text-primary' : 'text-accent'}`}>
                     {tx.positive ? '+' : '-'}{formatCurrency(tx.amount)}
                   </td>
 
-                  <td className="py-1 px-2 text-white capitalize">{tx.type}</td>
+                  <td className="py-1 px-2 text-white capitalize whitespace-nowrap">{tx.type}</td>
 
                   <td className="py-1 px-2 text-muted-foreground truncate">{tx.description || '—'}</td>
                 </tr>

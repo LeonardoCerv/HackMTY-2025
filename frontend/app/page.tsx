@@ -12,16 +12,18 @@ export default function Home() {
       <div className="mx-auto">
         <CompactDashboardHeader />
 
-        <div className="mt-2 grid gap-2 h-[calc(100vh-120px)]" style={{ gridTemplateColumns: '5fr 7fr' }}>
-          {/* Transactions Table - 5/12 of the page (left side) */}
+        <div className="mt-2 grid gap-2 h-[calc(100vh-120px)]" style={{ gridTemplateColumns: '3fr 9fr' }}>
+          {/* Transactions Table - 1/4 of the page (left side) */}
           <div className="w-full h-full">
             <TransactionsTable className="h-full" />
           </div>
 
-          {/* Chat + Graphs Section - 7/12 of the page (right side) */}
+          {/* Chat + Graphs Section - 3/4 of the page (right side) */}
           <div className="w-full h-full flex flex-col space-y-2">
             {/* Chat Input at the top - compact */}
-            <CompactAIChatAssistant />
+            <div className="max-h-40 overflow-hidden">
+              <CompactAIChatAssistant />
+            </div>
 
             {/* 2x1 Grid: income-expenses, loans-credit */}
             <div className="flex-1 grid gap-2 grid-cols-2">

@@ -138,7 +138,7 @@ export function CompactAIChatAssistant() {
           )}
 
           {/* Helpful tips when idle */}
-          {!isLoading && !response && (
+          {!isLoading && (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center space-y-2 p-4">
                 <MessageCircle className="h-8 w-8 text-muted-foreground mx-auto" />
